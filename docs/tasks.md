@@ -25,7 +25,7 @@
 - [x] Finalize, commit, deploy, and record the submission-ready TikTok build
 - [x] Add the verified TikTok profile photo for every creator in the built-in feed
 - [x] Replace mismatched local reel files with verified official TikTok embeds for every catalog account
-- [x] Replace external handoff cards with TikTok-sourced reels and a local playable video fallback
+- [x] Replace external handoff cards with verified TikTok official players
 - [x] Put a real `PRIVATE_KEY` and `SPONSOR_PRIVATE_KEY` in `.env`
 - [x] Deploy to Monad testnet and set `VITE_CLUTCH_ADDRESS`
 - [x] Fund the sponsor wallet with enough MON for the room starter flow
@@ -33,7 +33,7 @@
 - [x] Investigate public Monad RPC failures on `marketCount()` / market polling and harden the app against the public RPC rate limit
 - [x] Pivot the MVP framing to creator metric markets for Reels and YouTube views, likes, and comments
 - [x] Show the live Reel / YouTube source on the projector while the room votes YES/NO
-- [x] Replace pasted media URLs with a built-in TikTok-sourced feed that plays via local video fallback
+- [x] Replace pasted media URLs with a built-in TikTok-sourced feed rendered by the official player
 - [x] Add social-network surfaces around the reel feed: creator stories, profiles, follows, likes, saves, comments, and feed tabs
 - [x] Final readiness pass: social-betting copy, build, lint, env check, and contract tests
 - [x] Harden reel playback: every mounted reel force-plays muted inline with tap-to-play retry
@@ -42,7 +42,7 @@
 - [x] Reduce betting friction with a sticky instant-bet dock and swipe-mode YES/NO actions
 - [x] Validate TikTok source links in the built-in feed (no scrape, no paste-URL)
 - [x] Make the live feed TikTok-only so videos actually play in-app
-- [x] Switch reel playback to local MP4s so the feed never depends on blank IG/TikTok embed frames
+- [x] Remove local MP4 playback and render each verified TikTok account/post pair with the official player
 - [x] Make `/m` use Claude's DesktopFeed UI only; remove the old mobile social-feed shell
 - [x] Correct the built-in feed to TikTok-only source/profile pairs with exact post links
 - [x] Fix demo-blocking Monad gas bug: writes now pass an explicit gas limit (see `docs/architecture.md`)
@@ -74,7 +74,8 @@
 - Public app URL: `https://clutch-597773359205.europe-west2.run.app/frontend`
 - Live Monad testnet contract: `0x194bd79723fC1C6BC6Cf635349f0190EbCFf59AD`
 - Verified MonadScan page: `https://testnet.monadscan.com/address/0x194bd79723fC1C6BC6Cf635349f0190EbCFf59AD`
-- Public desktop and mobile browser smoke tests passed against Cloud Run revision `clutch-00003-r8b`; the remaining unchecked item is a real physical-phone pass on venue wifi.
+- Public desktop and mobile browser smoke tests passed against the production Cloud Run service `clutch`; the remaining unchecked item is a real physical-phone pass on venue wifi.
+- Direct `esbuild` is pinned at 0.28 so Vite 8's peer requirement is satisfied in Cloud Build.
 - Fallback recording: `artifacts/clutch-gcp-submission-demo.mp4` (30 seconds, 1440x900, H.264).
 - The `marketCount()` failure was not a bad contract deploy: the direct `eth_call` succeeded, but the old market loader did `1 + marketCount` reads per tick, which could exceed public RPC limits once several markets or devices were active. The frontend/server now use RPC failover, and market snapshots now collapse into a single Multicall3 read.
 - Regenerate the ABI with `pnpm abi` after any contract change, or the frontend silently drifts.

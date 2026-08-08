@@ -12,13 +12,11 @@ export type ClutchReel = {
   minutes: string
   platform: 'TikTok'
   tiktokVideoId: string
-  /** Locally hosted clip used for playback; see LOCAL_CLIPS below. */
-  videoSrc: string
-  posterSrc?: string
   profileUrl: string
   sourceLabel: string
   sourceUrl: string
   licenseUrl: string
+  videoSrc: string
   commentsPreview: Array<{
     author: string
     text: string
@@ -32,7 +30,7 @@ const tiktokUrl = (creator: string, path = '') => {
   return `https://www.tiktok.com/@${handle}${path}`
 }
 
-const tiktokSource = (creator: string, videoId: string) => ({
+const tiktokSource = (creator: string, videoId: string, videoSrc: string) => ({
   creator,
   platform: 'TikTok' as const,
   tiktokVideoId: videoId,
@@ -40,16 +38,18 @@ const tiktokSource = (creator: string, videoId: string) => ({
   sourceLabel: 'TikTok',
   sourceUrl: tiktokUrl(creator, `/video/${videoId}`),
   licenseUrl: TIKTOK_TERMS,
+  videoSrc,
 })
 
 /**
- * Built-in TikTok feed. Every post/account pair is verified against TikTok's
- * oEmbed endpoint and rendered with TikTok's official player.
+ * Built-in TikTok feed. Every post/account pair links to the verified TikTok
+ * source, while the in-app demo uses local playable clips so the feed survives
+ * venue wifi, cookie prompts, and iframe player failures.
  */
-const CATALOG: Array<Omit<ClutchReel, 'videoSrc'>> = [
+const CATALOG: ClutchReel[] = [
   {
     id: 'tt-zachking-glass',
-    ...tiktokSource('@zachking', '6749520869598481669'),
+    ...tiktokSource('@zachking', '6749520869598481669', '/media/reel-1.mp4'),
     displayName: 'Zach King',
     avatar: 'ZK',
     avatarSrc: '/media/tiktok-avatars/zachking.jpeg',
@@ -66,7 +66,7 @@ const CATALOG: Array<Omit<ClutchReel, 'videoSrc'>> = [
   },
   {
     id: 'tt-scout-suki',
-    ...tiktokSource('@scout2015', '6718335390845095173'),
+    ...tiktokSource('@scout2015', '6718335390845095173', '/media/reel-2.mp4'),
     displayName: 'Scout, Suki & Stella',
     avatar: 'SS',
     avatarSrc: '/media/tiktok-avatars/scout2015.jpeg',
@@ -83,7 +83,7 @@ const CATALOG: Array<Omit<ClutchReel, 'videoSrc'>> = [
   },
   {
     id: 'tt-jerryrig',
-    ...tiktokSource('@zacksjerryrig', '6828268207359413509'),
+    ...tiktokSource('@zacksjerryrig', '6828268207359413509', '/media/reel-3.mp4'),
     displayName: 'Jerry Rig Everything',
     avatar: 'JR',
     avatarSrc: '/media/tiktok-avatars/zacksjerryrig.jpeg',
@@ -100,7 +100,7 @@ const CATALOG: Array<Omit<ClutchReel, 'videoSrc'>> = [
   },
   {
     id: 'tt-nickthetutor',
-    ...tiktokSource('@nickthetutor', '6904353203454856454'),
+    ...tiktokSource('@nickthetutor', '6904353203454856454', '/media/reel-4.mp4'),
     displayName: 'Curvebreakers Test Prep',
     avatar: 'NT',
     avatarSrc: '/media/tiktok-avatars/nickthetutor.jpeg',
@@ -117,7 +117,7 @@ const CATALOG: Array<Omit<ClutchReel, 'videoSrc'>> = [
   },
   {
     id: 'tt-loveisland',
-    ...tiktokSource('@loveisland', '6976695645679668485'),
+    ...tiktokSource('@loveisland', '6976695645679668485', '/media/reel-5.mp4'),
     displayName: 'Love Island',
     avatar: 'LI',
     avatarSrc: '/media/tiktok-avatars/loveisland.jpeg',
@@ -134,7 +134,7 @@ const CATALOG: Array<Omit<ClutchReel, 'videoSrc'>> = [
   },
   {
     id: 'tt-cucumber',
-    ...tiktokSource('@logagm', '7394126805550058758'),
+    ...tiktokSource('@logagm', '7394126805550058758', '/media/sample-a.mp4'),
     displayName: 'Logan',
     avatar: 'LG',
     avatarSrc: '/media/tiktok-avatars/logagm.jpeg',
@@ -151,7 +151,7 @@ const CATALOG: Array<Omit<ClutchReel, 'videoSrc'>> = [
   },
   {
     id: 'tt-blaise',
-    ...tiktokSource('@blaiseeeeeeeeeeeee', '6893593227308322054'),
+    ...tiktokSource('@blaiseeeeeeeeeeeee', '6893593227308322054', '/media/sample-b.mp4'),
     displayName: 'Blaseeeeeeeeeeeeee',
     avatar: 'BL',
     avatarSrc: '/media/tiktok-avatars/blaiseeeeeeeeeeeee.jpeg',
@@ -168,7 +168,7 @@ const CATALOG: Array<Omit<ClutchReel, 'videoSrc'>> = [
   },
   {
     id: 'tt-littleqb',
-    ...tiktokSource('@4brett', '6933443770679610629'),
+    ...tiktokSource('@4brett', '6933443770679610629', '/media/reel-1.mp4'),
     displayName: 'Brett',
     avatar: 'BT',
     avatarSrc: '/media/tiktok-avatars/4brett.jpeg',
@@ -185,26 +185,7 @@ const CATALOG: Array<Omit<ClutchReel, 'videoSrc'>> = [
   },
 ]
 
-/**
- * Playback is served from local MP4s rather than TikTok's iframe.
- *
- * The embed put a cookie-consent dialog over the video, needed a live
- * connection to tiktok.com, and could not be styled — all bad on a projector
- * over venue wifi. The verified post and profile URLs stay on every card as
- * attribution, so the catalog is still sourced, just not remotely rendered.
- */
-const LOCAL_CLIPS = [
-  '/media/reel-1.mp4',
-  '/media/reel-2.mp4',
-  '/media/reel-3.mp4',
-  '/media/reel-4.mp4',
-  '/media/reel-5.mp4',
-]
-
-export const REELS: ClutchReel[] = CATALOG.map((reel, i) => ({
-  ...reel,
-  videoSrc: LOCAL_CLIPS[i % LOCAL_CLIPS.length],
-}))
+export const REELS: ClutchReel[] = CATALOG
 
 export function getReelById(id?: string | null): ClutchReel | null {
   if (!id) return null

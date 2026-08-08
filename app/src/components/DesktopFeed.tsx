@@ -258,7 +258,7 @@ export function DesktopFeed({
             pointerStart.current = null
           }}
         >
-          <SocialEmbed reel={reel} muted={muted} backdrop />
+          <SocialEmbed reel={reel} muted={muted} />
 
           <div className="tt-player-top">
             <button

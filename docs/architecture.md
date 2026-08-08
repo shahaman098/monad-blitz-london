@@ -68,6 +68,8 @@ Keep `SPONSOR_PRIVATE_KEY` distinct from `PRIVATE_KEY` so a drained sponsor cann
 
 Production stores `SPONSOR_PRIVATE_KEY` in Google Secret Manager as `clutch-sponsor-private-key`. Cloud Run is capped at one instance so sponsor sends remain nonce-serialised within one process.
 
+Vite 8's optional peer requires `esbuild ^0.27 || ^0.28`. Keep the direct dependency inside that range so Cloud Build uses a compatible server bundler.
+
 ## Commands
 
 ```bash
