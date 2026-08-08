@@ -16,7 +16,6 @@ export type ClutchReel = {
   sourceLabel: string
   sourceUrl: string
   licenseUrl: string
-  videoSrc: string
   commentsPreview: Array<{
     author: string
     text: string
@@ -30,7 +29,7 @@ const tiktokUrl = (creator: string, path = '') => {
   return `https://www.tiktok.com/@${handle}${path}`
 }
 
-const tiktokSource = (creator: string, videoId: string, videoSrc: string) => ({
+const tiktokSource = (creator: string, videoId: string) => ({
   creator,
   platform: 'TikTok' as const,
   tiktokVideoId: videoId,
@@ -38,18 +37,16 @@ const tiktokSource = (creator: string, videoId: string, videoSrc: string) => ({
   sourceLabel: 'TikTok',
   sourceUrl: tiktokUrl(creator, `/video/${videoId}`),
   licenseUrl: TIKTOK_TERMS,
-  videoSrc,
 })
 
 /**
- * Built-in TikTok feed. Every post/account pair links to the verified TikTok
- * source, while the in-app demo uses local playable clips so the feed survives
- * venue wifi, cookie prompts, and iframe player failures.
+ * Built-in TikTok feed. Every post/account pair is verified against TikTok's
+ * oEmbed endpoint and rendered with TikTok's official player.
  */
 const CATALOG: ClutchReel[] = [
   {
     id: 'tt-zachking-glass',
-    ...tiktokSource('@zachking', '6749520869598481669', '/media/reel-1.mp4'),
+    ...tiktokSource('@zachking', '6749520869598481669'),
     displayName: 'Zach King',
     avatar: 'ZK',
     avatarSrc: '/media/tiktok-avatars/zachking.jpeg',
@@ -66,7 +63,7 @@ const CATALOG: ClutchReel[] = [
   },
   {
     id: 'tt-scout-suki',
-    ...tiktokSource('@scout2015', '6718335390845095173', '/media/reel-2.mp4'),
+    ...tiktokSource('@scout2015', '6718335390845095173'),
     displayName: 'Scout, Suki & Stella',
     avatar: 'SS',
     avatarSrc: '/media/tiktok-avatars/scout2015.jpeg',
@@ -83,7 +80,7 @@ const CATALOG: ClutchReel[] = [
   },
   {
     id: 'tt-jerryrig',
-    ...tiktokSource('@zacksjerryrig', '6828268207359413509', '/media/reel-3.mp4'),
+    ...tiktokSource('@zacksjerryrig', '6828268207359413509'),
     displayName: 'Jerry Rig Everything',
     avatar: 'JR',
     avatarSrc: '/media/tiktok-avatars/zacksjerryrig.jpeg',
@@ -100,7 +97,7 @@ const CATALOG: ClutchReel[] = [
   },
   {
     id: 'tt-nickthetutor',
-    ...tiktokSource('@nickthetutor', '6904353203454856454', '/media/reel-4.mp4'),
+    ...tiktokSource('@nickthetutor', '6904353203454856454'),
     displayName: 'Curvebreakers Test Prep',
     avatar: 'NT',
     avatarSrc: '/media/tiktok-avatars/nickthetutor.jpeg',
@@ -117,7 +114,7 @@ const CATALOG: ClutchReel[] = [
   },
   {
     id: 'tt-loveisland',
-    ...tiktokSource('@loveisland', '6976695645679668485', '/media/reel-5.mp4'),
+    ...tiktokSource('@loveisland', '6976695645679668485'),
     displayName: 'Love Island',
     avatar: 'LI',
     avatarSrc: '/media/tiktok-avatars/loveisland.jpeg',
@@ -134,7 +131,7 @@ const CATALOG: ClutchReel[] = [
   },
   {
     id: 'tt-cucumber',
-    ...tiktokSource('@logagm', '7394126805550058758', '/media/sample-a.mp4'),
+    ...tiktokSource('@logagm', '7394126805550058758'),
     displayName: 'Logan',
     avatar: 'LG',
     avatarSrc: '/media/tiktok-avatars/logagm.jpeg',
@@ -151,7 +148,7 @@ const CATALOG: ClutchReel[] = [
   },
   {
     id: 'tt-blaise',
-    ...tiktokSource('@blaiseeeeeeeeeeeee', '6893593227308322054', '/media/sample-b.mp4'),
+    ...tiktokSource('@blaiseeeeeeeeeeeee', '6893593227308322054'),
     displayName: 'Blaseeeeeeeeeeeeee',
     avatar: 'BL',
     avatarSrc: '/media/tiktok-avatars/blaiseeeeeeeeeeeee.jpeg',
@@ -168,7 +165,7 @@ const CATALOG: ClutchReel[] = [
   },
   {
     id: 'tt-littleqb',
-    ...tiktokSource('@4brett', '6933443770679610629', '/media/reel-1.mp4'),
+    ...tiktokSource('@4brett', '6933443770679610629'),
     displayName: 'Brett',
     avatar: 'BT',
     avatarSrc: '/media/tiktok-avatars/4brett.jpeg',

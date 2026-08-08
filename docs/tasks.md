@@ -50,6 +50,7 @@
 - [x] Verify a real bet end to end against the deployed testnet contract from the app
 - [x] Replace the social-feed icon set with Meta Astryx-rendered app SVG glyphs
 - [x] Restore desktop feed wheel and swipe gestures for changing reels
+- [x] Delete stale old-UI submission screenshots and capture the current feed UI product image
 - [ ] Smoke test the QR join flow from an actual phone on the venue wifi
 
 ## Before The Pitch
@@ -77,6 +78,7 @@
 - Public desktop and mobile browser smoke tests passed against the production Cloud Run service `clutch`; the remaining unchecked item is a real physical-phone pass on venue wifi.
 - Direct `esbuild` is pinned at 0.28 so Vite 8's peer requirement is satisfied in Cloud Build.
 - Fallback recording: `artifacts/clutch-gcp-submission-demo.mp4` (30 seconds, 1440x900, H.264).
+- Submission product image: `output/submission/clutch-product-current-feed.jpg` (current `/m` feed UI, 1280x720, under 4 MB).
 - The `marketCount()` failure was not a bad contract deploy: the direct `eth_call` succeeded, but the old market loader did `1 + marketCount` reads per tick, which could exceed public RPC limits once several markets or devices were active. The frontend/server now use RPC failover, and market snapshots now collapse into a single Multicall3 read.
 - Regenerate the ABI with `pnpm abi` after any contract change, or the frontend silently drifts.
 - Midroll is archived, not deleted: `docs/archive/`, `contracts/src/MidrollEscrow.sol`.

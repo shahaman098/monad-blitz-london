@@ -1,9 +1,7 @@
+import { TikTokEmbed } from './TikTokEmbed'
 import type { ClutchReel } from '../lib/reels'
 
-/**
- * Feed playback prefers local clips so the hackathon demo never shows a blank
- * iframe or cookie prompt. The verified TikTok post remains one click away.
- */
+/** Render the verified catalog account/post pair with TikTok's official player. */
 export function SocialEmbed({
   compact = false,
   forcePlay = true,
@@ -16,19 +14,13 @@ export function SocialEmbed({
   reel: ClutchReel
 }) {
   return (
-    <div className={`social-embed-shell local-video-shell ${compact ? 'is-compact' : ''}`}>
-      <video
-        src={reel.videoSrc}
-        aria-label={`${reel.displayName}: ${reel.caption}`}
-        autoPlay={forcePlay}
-        muted={muted}
-        loop
-        playsInline
-        preload="metadata"
-      />
-      <a className="social-embed-fallback is-quiet" href={reel.sourceUrl} target="_blank" rel="noreferrer">
-        Open on TikTok
-      </a>
-    </div>
+    <TikTokEmbed
+      videoId={reel.tiktokVideoId}
+      caption={`${reel.displayName}: ${reel.caption}`}
+      sourceUrl={reel.sourceUrl}
+      compact={compact}
+      autoplay={forcePlay}
+      muted={muted}
+    />
   )
 }

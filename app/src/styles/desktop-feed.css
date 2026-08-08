@@ -236,11 +236,7 @@
   min-height: 0 !important;
 }
 
-/*
- * Local clips are 16:9 inside a 9:16 frame. Without these the <video> falls
- * back to height:auto and sits pinned to the top of the frame with a large
- * black gap beneath it; this fills the frame and centres the letterbox.
- */
+/* Pin the media shell to the 9:16 frame. */
 .tt-app .tt-player .social-embed-shell {
   position: absolute;
   inset: 0;
@@ -253,7 +249,25 @@
   height: 100%;
   object-fit: contain;
   display: block;
-  background: #000;
+  background: transparent;
+}
+
+/* Blurred fill behind 16:9 clips, so the 9:16 frame does not read as broken. */
+.tt-app .tt-player .social-embed-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(26px) saturate(1.25) brightness(0.55);
+  transform: scale(1.15);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.tt-app .tt-player .social-embed-shell > video:not(.social-embed-bg) {
+  position: relative;
+  z-index: 1;
 }
 
 .tt-player-top,
@@ -825,24 +839,4 @@
     max-width: min(100vw, 28rem);
     border-radius: 0;
   }
-}
-
-/* Blurred fill behind letterboxed 16:9 clips, so the 9:16 frame is not
-   two-thirds dead black on the projector. */
-.tt-app .tt-player .social-embed-bg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  filter: blur(26px) saturate(1.25) brightness(0.55);
-  transform: scale(1.15);
-  pointer-events: none;
-  z-index: 0;
-}
-
-.tt-app .tt-player .social-embed-shell > video:not(.social-embed-bg) {
-  position: relative;
-  z-index: 1;
-  background: transparent;
 }
