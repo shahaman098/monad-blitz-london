@@ -1,0 +1,58 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-ink: #06070a;
+  --color-panel: #0e1117;
+  --color-edge: #1e2430;
+  --color-yes: #38e07b;
+  --color-no: #ff4d6a;
+  --color-dim: #8b95a7;
+  --font-mono: 'SF Mono', 'JetBrains Mono', ui-monospace, monospace;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background: var(--color-ink);
+  color: #f2f5fa;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+/* Tabular numerals everywhere numbers move, so nothing jitters on reprice. */
+.nums {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+}
+
+@keyframes flash {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.flash-in {
+  animation: flash 200ms ease-out;
+}
+
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgb(56 224 123 / 45%);
+  }
+  100% {
+    box-shadow: 0 0 0 18px rgb(56 224 123 / 0%);
+  }
+}
+
+.pulse {
+  animation: pulse-ring 900ms ease-out;
+}

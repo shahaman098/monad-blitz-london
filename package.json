@@ -1,0 +1,16 @@
+{
+  "name": "clutch-monad",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@11.13.0",
+  "scripts": {
+    "dev": "pnpm --dir app dev",
+    "abi": "node scripts/gen-abi.mjs",
+    "build": "pnpm --dir app build && forge build --root contracts",
+    "web:dev": "pnpm --dir app dev",
+    "web:build": "pnpm --dir app build",
+    "contract:build": "forge build --root contracts",
+    "contract:test": "forge test --root contracts",
+    "deploy:testnet": "forge script contracts/script/DeployClutch.s.sol:DeployClutchScript --root contracts --rpc-url $MONAD_RPC_URL --broadcast"
+  }
+}
