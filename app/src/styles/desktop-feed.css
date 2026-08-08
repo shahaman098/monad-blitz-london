@@ -117,7 +117,9 @@
   color: var(--tt-red);
 }
 
-.tt-cta {
+/* Scoped with .tt-app so it outranks `.tt-app button { background: none }`,
+   which otherwise strips the fill when this renders as a <button>. */
+.tt-app .tt-cta {
   width: 100%;
   height: 48px;
   margin: 14px 0 20px;
@@ -128,12 +130,18 @@
   font-weight: 700;
 }
 
-.tt-cta:disabled {
+.tt-app .tt-cta:disabled {
   opacity: 0.55;
   cursor: default;
 }
 
-.tt-cta.is-ghost {
+/* One numeral style across the surface: product sans, tabular alignment. */
+.tt-app .nums {
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+.tt-app .tt-cta.is-ghost {
   background: #fff;
   color: var(--tt-red);
   border: 1px solid rgba(254, 44, 85, 0.35);
@@ -194,6 +202,13 @@
   overflow: hidden;
   background: #000;
   flex-shrink: 0;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.tt-player:active {
+  cursor: grabbing;
 }
 
 .tt-player iframe,
@@ -219,6 +234,26 @@
   width: 100%;
   height: 100%;
   min-height: 0 !important;
+}
+
+/*
+ * Local clips are 16:9 inside a 9:16 frame. Without these the <video> falls
+ * back to height:auto and sits pinned to the top of the frame with a large
+ * black gap beneath it; this fills the frame and centres the letterbox.
+ */
+.tt-app .tt-player .social-embed-shell {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  min-height: 0;
+}
+
+.tt-app .tt-player video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  background: #000;
 }
 
 .tt-player-top,
@@ -499,11 +534,11 @@
 }
 
 /* Bet dock — Clutch's addition, sized to sit inside the panel rhythm. */
+/* Flat section in the panel column — no card-inside-a-card nesting. */
 .tt-bet {
-  margin: 0 24px 14px;
-  padding: 14px 16px;
-  border: 1px solid var(--tt-line);
-  border-radius: 10px;
+  margin: 0 24px 12px;
+  padding: 0 0 14px;
+  border-bottom: 1px solid var(--tt-line);
 }
 
 .tt-bet-q {
@@ -790,4 +825,24 @@
     max-width: min(100vw, 28rem);
     border-radius: 0;
   }
+}
+
+/* Blurred fill behind letterboxed 16:9 clips, so the 9:16 frame is not
+   two-thirds dead black on the projector. */
+.tt-app .tt-player .social-embed-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(26px) saturate(1.25) brightness(0.55);
+  transform: scale(1.15);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.tt-app .tt-player .social-embed-shell > video:not(.social-embed-bg) {
+  position: relative;
+  z-index: 1;
+  background: transparent;
 }

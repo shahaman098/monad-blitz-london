@@ -12,6 +12,9 @@ export type ClutchReel = {
   minutes: string
   platform: 'TikTok'
   tiktokVideoId: string
+  /** Locally hosted clip used for playback; see LOCAL_CLIPS below. */
+  videoSrc: string
+  posterSrc?: string
   profileUrl: string
   sourceLabel: string
   sourceUrl: string
@@ -43,7 +46,7 @@ const tiktokSource = (creator: string, videoId: string) => ({
  * Built-in TikTok feed. Every post/account pair is verified against TikTok's
  * oEmbed endpoint and rendered with TikTok's official player.
  */
-export const REELS: ClutchReel[] = [
+const CATALOG: Array<Omit<ClutchReel, 'videoSrc'>> = [
   {
     id: 'tt-zachking-glass',
     ...tiktokSource('@zachking', '6749520869598481669'),
@@ -181,6 +184,27 @@ export const REELS: ClutchReel[] = [
     ],
   },
 ]
+
+/**
+ * Playback is served from local MP4s rather than TikTok's iframe.
+ *
+ * The embed put a cookie-consent dialog over the video, needed a live
+ * connection to tiktok.com, and could not be styled — all bad on a projector
+ * over venue wifi. The verified post and profile URLs stay on every card as
+ * attribution, so the catalog is still sourced, just not remotely rendered.
+ */
+const LOCAL_CLIPS = [
+  '/media/reel-1.mp4',
+  '/media/reel-2.mp4',
+  '/media/reel-3.mp4',
+  '/media/reel-4.mp4',
+  '/media/reel-5.mp4',
+]
+
+export const REELS: ClutchReel[] = CATALOG.map((reel, i) => ({
+  ...reel,
+  videoSrc: LOCAL_CLIPS[i % LOCAL_CLIPS.length],
+}))
 
 export function getReelById(id?: string | null): ClutchReel | null {
   if (!id) return null

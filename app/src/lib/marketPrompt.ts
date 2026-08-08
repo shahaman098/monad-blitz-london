@@ -1,6 +1,7 @@
-import { getReelById, type ClutchReel } from './reels'
+import { getReelById, REELS, type ClutchReel } from './reels'
 
 const META_MARKER = '\n---CLUTCH-META---\n'
+const LEGACY_DEMO_QUESTION = /^will this demo win the room\??$/i
 
 export type MarketPromptMeta = {
   reelId?: string
@@ -21,10 +22,16 @@ export function buildMarketPrompt(question: string, meta: MarketPromptMeta = {})
 export function parseMarketPrompt(raw: string): ParsedMarketPrompt {
   const [questionPart, metaPart] = raw.split(META_MARKER)
   const reelId = readReelId(metaPart)
+  const reel = getReelById(reelId)
+  const question = questionPart.trim()
   return {
-    question: questionPart.trim(),
+    // Market #0 was deployed before the creator-market pivot and cannot be
+    // edited on-chain. Keep that internal seed copy out of every UI surface.
+    question: LEGACY_DEMO_QUESTION.test(question)
+      ? (reel ?? REELS[0])?.marketQuestion ?? 'Live creator momentum market'
+      : question,
     reelId,
-    reel: getReelById(reelId),
+    reel,
   }
 }
 

@@ -7,13 +7,17 @@
   --bp-fg: #161823;
   --bp-muted: rgba(22, 24, 35, 0.56);
   --bp-line: rgba(22, 24, 35, 0.12);
-  --bp-fill: rgba(22, 24, 35, 0.05);
-  --bp-yes: #0a9396;
+  --bp-fill: #f1f1f2;
+  /* Product palette: TikTok-style cyan + red, not a separate chart theme.
+     `--bp-yes` is darkened for text contrast on white; `--bp-yes-fill` is the
+     brand cyan used for solid fills, matching .mt-yes on the mobile dock. */
+  --bp-yes: #0e93a6;
+  --bp-yes-fill: #20d5ec;
   --bp-no: #fe2c55;
 
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   color: var(--bp-fg);
   font-size: 13px;
 }
@@ -24,6 +28,16 @@
   --bp-line: rgba(255, 255, 255, 0.14);
   --bp-fill: rgba(255, 255, 255, 0.08);
   --bp-yes: #20d5ec;
+}
+
+/*
+ * The global `.nums` helper switches to a mono face. That reads as a terminal
+ * next to the feed's system-sans UI, so inside the panel keep the product font
+ * and take only the tabular alignment.
+ */
+.bp .nums {
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
 }
 
 .bp button {
@@ -157,9 +171,7 @@
 }
 
 .bp-stats span {
-  font-size: 9px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-size: 11px;
   color: var(--bp-muted);
 }
 
@@ -174,14 +186,14 @@
   display: flex;
   gap: 4px;
   padding: 3px;
-  border-radius: 8px;
+  border-radius: 92px;
   background: var(--bp-fill);
 }
 
 .bp-mode button {
   flex: 1;
-  padding: 5px;
-  border-radius: 6px;
+  padding: 6px;
+  border-radius: 92px;
   font-size: 12px;
   font-weight: 700;
   color: var(--bp-muted);
@@ -213,9 +225,9 @@
   align-items: baseline;
   justify-content: center;
   gap: 6px;
-  padding: 7px 8px;
-  border-radius: 10px;
-  border: 1.5px solid var(--bp-line);
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--bp-line);
   transition: transform 100ms ease;
 }
 
@@ -235,14 +247,14 @@
 }
 
 .bp-yes.is-active {
-  border-color: var(--bp-yes);
-  background: color-mix(in srgb, var(--bp-yes) 12%, transparent);
+  border-color: var(--bp-yes-fill, var(--bp-yes));
+  background: color-mix(in srgb, var(--bp-yes-fill, var(--bp-yes)) 15%, transparent);
   color: var(--bp-yes);
 }
 
 .bp-no.is-active {
   border-color: var(--bp-no);
-  background: color-mix(in srgb, var(--bp-no) 12%, transparent);
+  background: color-mix(in srgb, var(--bp-no) 10%, transparent);
   color: var(--bp-no);
 }
 
@@ -257,9 +269,9 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 10px;
+  padding: 7px 12px;
   border: 1px solid var(--bp-line);
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
 .bp-amount label {
@@ -292,8 +304,8 @@
 
 .bp-chips button {
   flex: 1;
-  padding: 4px 3px;
-  border-radius: 6px;
+  padding: 5px 4px;
+  border-radius: 92px;
   background: var(--bp-fill);
   font-size: 11px;
   font-weight: 700;
@@ -314,10 +326,10 @@
 .bp-payout {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 7px 10px;
-  border-radius: 10px;
-  background: var(--bp-fill);
+  gap: 3px;
+  padding: 8px 0;
+  border-top: 1px solid var(--bp-line);
+  border-bottom: 1px solid var(--bp-line);
 }
 
 .bp-payout div {
@@ -346,8 +358,8 @@
 
 .bp-submit {
   width: 100%;
-  padding: 10px;
-  border-radius: 10px;
+  padding: 11px;
+  border-radius: 8px;
   background: var(--bp-fg);
   color: #fff;
   font-size: 13.5px;
@@ -361,7 +373,7 @@
 }
 
 .bp-submit.is-yes {
-  background: var(--bp-yes);
+  background: var(--bp-yes-fill, var(--bp-yes));
   color: #04252a;
 }
 
@@ -410,15 +422,13 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  padding: 10px;
+  padding: 12px;
   border: 1px solid var(--bp-line);
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
 .bp-settled p {
   font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
   color: var(--bp-muted);
 }
 
@@ -448,9 +458,8 @@
 }
 
 .bp-activity-head {
-  font-size: 10.5px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  font-size: 11px;
+  font-weight: 600;
   color: var(--bp-muted);
   margin-bottom: 4px;
 }

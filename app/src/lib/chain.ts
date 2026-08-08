@@ -18,6 +18,7 @@ export const RPC_URL = RPC_URLS[0]
 
 export const EXPLORER = 'https://testnet.monadscan.com'
 export const MULTICALL3_ADDRESS = '0xca11bde05977b3631167028862be2a173976ca11' as const
+const DEFAULT_CLUTCH_ADDRESS = '0x194bd79723fC1C6BC6Cf635349f0190EbCFf59AD'
 
 export const monadTestnet = defineChain({
   id: Number(import.meta.env.VITE_MONAD_CHAIN_ID ?? 10143),
@@ -41,7 +42,8 @@ export const publicClient = createPublicClient({
   pollingInterval: 500,
 })
 
-export const CLUTCH_ADDRESS = (import.meta.env.VITE_CLUTCH_ADDRESS ?? '') as `0x${string}`
+export const CLUTCH_ADDRESS = (import.meta.env.VITE_CLUTCH_ADDRESS ??
+  DEFAULT_CLUTCH_ADDRESS) as `0x${string}`
 
 export const hasContract = /^0x[0-9a-fA-F]{40}$/.test(CLUTCH_ADDRESS)
 

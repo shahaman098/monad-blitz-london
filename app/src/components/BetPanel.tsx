@@ -137,7 +137,12 @@ export function BetPanel({
         <p className="bp-timing">{timing}</p>
       </div>
 
-      <PriceChart points={series} seededUpTo={seededUpTo} height={76} />
+      <PriceChart
+        points={series}
+        seededUpTo={seededUpTo}
+        height={76}
+        accent="var(--bp-yes-fill, var(--bp-yes))"
+      />
 
       <div className="bp-stats">
         <div>

@@ -13,7 +13,7 @@ export function PriceChart({
   points,
   seededUpTo = 0,
   height = 76,
-  accent = 'var(--bp-yes)',
+  accent = 'var(--bp-yes-fill, var(--bp-yes))',
 }: {
   points: PricePoint[]
   seededUpTo?: number

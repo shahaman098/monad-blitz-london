@@ -14,8 +14,8 @@ export default defineConfig(({ mode }) => {
       react(),
       tailwindcss(),
       {
-        // Runs the Vercel serverless handler in `vite dev` so the join flow
-        // works locally and over the venue LAN, not just on Vercel.
+        // Runs the production API handler in `vite dev` so the join flow also
+        // works locally and over the venue LAN.
         name: 'clutch-dev-api',
         configureServer(server) {
           server.middlewares.use(async (req, res, next) => {

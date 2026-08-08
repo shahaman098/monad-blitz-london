@@ -2,7 +2,7 @@
 
 ## Status
 
-Live on Monad testnet and Vercel. End to end flow is verified locally, and the public deploy has passed a mobile-browser smoke test against production.
+Live on Monad testnet and Google Cloud Run. End to end flow is verified locally, and the public deploy has passed desktop and mobile browser smoke tests against production.
 
 > The previous Midroll architecture is preserved at [`docs/archive/midroll-architecture.md`](./archive/midroll-architecture.md).
 
@@ -11,8 +11,8 @@ Live on Monad testnet and Vercel. End to end flow is verified locally, and the p
 - Contract: Solidity 0.8.24 + Foundry (`contracts/`)
 - Frontend: React 19 + Vite + TypeScript + Tailwind v4 (`app/`)
 - Chain client: `viem` (no wagmi — the burner path needs a raw local signer)
-- Serverless: one Vercel Node function (`app/api/fund.ts`), also mounted into `vite dev`
-- Hosting: Vercel with project root `app`; Monad testnet for the contract
+- Server: `app/server.ts` serves the built SPA and mounts `app/api/fund.ts`; Vite mounts the same handler in development
+- Hosting: Google Cloud Run service `clutch` in `europe-west2`; Monad testnet for the contract
 
 ## System Components
 
@@ -66,6 +66,8 @@ See [`.env.example`](../.env.example). Frontend vars need the `VITE_` prefix; Vi
 
 Keep `SPONSOR_PRIVATE_KEY` distinct from `PRIVATE_KEY` so a drained sponsor cannot block market resolution.
 
+Production stores `SPONSOR_PRIVATE_KEY` in Google Secret Manager as `clutch-sponsor-private-key`. Cloud Run is capped at one instance so sponsor sends remain nonce-serialised within one process.
+
 ## Commands
 
 ```bash
@@ -81,6 +83,12 @@ Deploy:
 
 ```bash
 pnpm deploy:testnet
+gcloud run deploy clutch --source . \
+  --project project-ced3b331-e814-4d72-8bc \
+  --region europe-west2 \
+  --allow-unauthenticated \
+  --set-secrets=SPONSOR_PRIVATE_KEY=clutch-sponsor-private-key:latest \
+  --max-instances=1
 ```
 
 ## Monad Gas Gotcha (demo-critical)

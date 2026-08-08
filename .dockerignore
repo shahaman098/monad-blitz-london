@@ -1,0 +1,13 @@
+.git
+.github
+.env
+.env.*
+!.env.example
+app/node_modules
+app/dist
+app/server-dist
+contracts
+docs
+node_modules
+artifacts
+*.log

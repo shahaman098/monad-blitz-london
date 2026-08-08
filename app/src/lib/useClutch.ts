@@ -240,23 +240,27 @@ function seedTrend(marketId: number, count: number, endBps: number): number[] {
     return s / 233280
   }
 
+  // Waypoints, not a random walk: a walk this short averages out to a flat line.
+  // A rally, a sell-off, then a drift onto the live price gives a readable shape.
+  const rally = 5000 + 1400 + Math.round(rand() * 1600) // ~64–80%
+  const dump = 2600 + Math.round(rand() * 1500) // ~26–41%
+  const waypoints = [5000, rally, dump, endBps]
+
   const out: number[] = []
-  let v = 5000
-  // Three phases: drift, a run, then a reversal back toward the live price.
+  const legs = waypoints.length - 1
   for (let i = 0; i < count; i++) {
-    const phase = i / count
-    const bias = phase < 0.35 ? 18 : phase < 0.7 ? 46 : -38
-    v += bias * (rand() - 0.35) + (rand() - 0.5) * 90
-    v = Math.max(1200, Math.min(8800, v))
-    out.push(Math.round(v))
+    const t = (i / (count - 1)) * legs
+    const leg = Math.min(legs - 1, Math.floor(t))
+    const k = t - leg
+    // Smoothstep keeps the turns curved rather than sawtoothed.
+    const ease = k * k * (3 - 2 * k)
+    const base = waypoints[leg] + (waypoints[leg + 1] - waypoints[leg]) * ease
+    const noise = (rand() - 0.5) * 420
+    // Damp the noise near the end so the join onto the live price stays clean.
+    const damp = i > count - 5 ? 0.15 : 1
+    out.push(Math.round(Math.max(800, Math.min(9200, base + noise * damp))))
   }
-  // Ease the tail onto the true current price so the join is not a visible jump.
-  const tail = Math.min(6, out.length)
-  for (let i = 0; i < tail; i++) {
-    const w = (i + 1) / tail
-    const at = out.length - tail + i
-    out[at] = Math.round(out[at] * (1 - w) + endBps * w)
-  }
+  out[out.length - 1] = endBps
   return out
 }
 

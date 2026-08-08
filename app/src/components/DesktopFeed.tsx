@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import type { PointerEvent, WheelEvent } from 'react'
 import '../styles/desktop-feed.css'
 import { BetPanel } from './BetPanel'
 import { CreatorAvatar } from './CreatorAvatar'
@@ -130,6 +131,9 @@ export function DesktopFeed({
   const [nav, setNav] = useState<string>('For You')
   const [tab, setTab] = useState<'Comments' | 'You may like'>('You may like')
   const [muted, setMuted] = useState(true)
+  const wheelDelta = useRef(0)
+  const wheelLocked = useRef(false)
+  const pointerStart = useRef<{ x: number; y: number } | null>(null)
 
   const reel = reels[index] ?? reels[0] ?? null
 
@@ -140,6 +144,44 @@ export function DesktopFeed({
   const step = (delta: 1 | -1) => {
     if (reels.length === 0) return
     onIndexChange((index + delta + reels.length) % reels.length)
+  }
+
+  const commitStep = (delta: 1 | -1) => {
+    if (wheelLocked.current) return
+    wheelLocked.current = true
+    step(delta)
+    window.setTimeout(() => {
+      wheelLocked.current = false
+      wheelDelta.current = 0
+    }, 420)
+  }
+
+  const onStageWheel = (event: WheelEvent<HTMLElement>) => {
+    const primaryDelta =
+      Math.abs(event.deltaY) >= Math.abs(event.deltaX) ? event.deltaY : event.deltaX
+    if (Math.abs(primaryDelta) < 4) return
+
+    event.preventDefault()
+    wheelDelta.current += primaryDelta
+    if (Math.abs(wheelDelta.current) < 80) return
+    commitStep(wheelDelta.current > 0 ? 1 : -1)
+  }
+
+  const onPlayerPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    pointerStart.current = { x: event.clientX, y: event.clientY }
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }
+
+  const onPlayerPointerEnd = (event: PointerEvent<HTMLDivElement>) => {
+    const start = pointerStart.current
+    pointerStart.current = null
+    if (!start) return
+
+    const dx = event.clientX - start.x
+    const dy = event.clientY - start.y
+    const primary = Math.abs(dy) >= Math.abs(dx) ? dy : -dx
+    if (Math.abs(primary) < 72) return
+    commitStep(primary > 0 ? 1 : -1)
   }
 
   const suggestions = useMemo(
@@ -207,9 +249,16 @@ export function DesktopFeed({
       </aside>
 
       {/* -------------------------------------------------------- centre */}
-      <main className="tt-stage">
-        <div className="tt-player">
-          <SocialEmbed reel={reel} muted={muted} />
+      <main className="tt-stage" onWheel={onStageWheel}>
+        <div
+          className="tt-player"
+          onPointerDown={onPlayerPointerDown}
+          onPointerUp={onPlayerPointerEnd}
+          onPointerCancel={() => {
+            pointerStart.current = null
+          }}
+        >
+          <SocialEmbed reel={reel} muted={muted} backdrop />
 
           <div className="tt-player-top">
             <button

@@ -2,3 +2,4 @@ packages:
   - app
 allowBuilds:
   '@astryxdesign/core': true
+  esbuild: true

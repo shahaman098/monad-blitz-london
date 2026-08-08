@@ -20,14 +20,16 @@
 
 ## Now
 
-- [ ] Finalize, commit, deploy, and record the submission-ready TikTok build
+- [x] Repair the current app deployment and verify the public build end to end
+- [x] Remove the stale market question from the mobile bet dock and fix its bottom layout
+- [x] Finalize, commit, deploy, and record the submission-ready TikTok build
 - [x] Add the verified TikTok profile photo for every creator in the built-in feed
 - [x] Replace mismatched local reel files with verified official TikTok embeds for every catalog account
 - [x] Replace external handoff cards with TikTok-sourced reels and a local playable video fallback
 - [x] Put a real `PRIVATE_KEY` and `SPONSOR_PRIVATE_KEY` in `.env`
 - [x] Deploy to Monad testnet and set `VITE_CLUTCH_ADDRESS`
 - [x] Fund the sponsor wallet with enough MON for the room starter flow
-- [x] Deploy to Vercel with project root `app`, env vars set in the dashboard
+- [x] Deploy to Google Cloud Run in `europe-west2` with the sponsor key in Secret Manager
 - [x] Investigate public Monad RPC failures on `marketCount()` / market polling and harden the app against the public RPC rate limit
 - [x] Pivot the MVP framing to creator metric markets for Reels and YouTube views, likes, and comments
 - [x] Show the live Reel / YouTube source on the projector while the room votes YES/NO
@@ -46,13 +48,14 @@
 - [x] Fix demo-blocking Monad gas bug: writes now pass an explicit gas limit (see `docs/architecture.md`)
 - [x] Make tx errors readable (viem's multi-line revert text was being truncated to a dangling header)
 - [x] Verify a real bet end to end against the deployed testnet contract from the app
-- [x] Route the social-feed icon barrel through Meta's open-source Astryx icon component
+- [x] Replace the social-feed icon set with Meta Astryx-rendered app SVG glyphs
+- [x] Restore desktop feed wheel and swipe gestures for changing reels
 - [ ] Smoke test the QR join flow from an actual phone on the venue wifi
 
 ## Before The Pitch
 
 - [ ] Open 2–3 markets on the demo lineup early in the day so the room is trading before we present
-- [ ] **Record a 30s fallback screen capture the moment it first works live** — non-negotiable
+- [x] **Record a 30s fallback screen capture the moment it first works live** — non-negotiable
 - [ ] Rehearse `docs/pitch.md` against the deployed app with one phone and the projector screen
 - [x] Verify the contract on MonadScan (`https://testnet.monadscan.com/verifyContract`)
 - [ ] Rehearse the 30-second open: latency claim first, category name never
@@ -68,10 +71,11 @@
 
 - Judging is a **live audience vote of fellow builders**, not a panel. Optimise for the room having traded before the pitch starts.
 - Use `docs/pitch.md` as the pitch source of truth: latency claim first, audience participation second, MonadScan proof third.
-- Public app URL: `https://app-ten-ashen-86.vercel.app`
+- Public app URL: `https://clutch-597773359205.europe-west2.run.app/frontend`
 - Live Monad testnet contract: `0x194bd79723fC1C6BC6Cf635349f0190EbCFf59AD`
 - Verified MonadScan page: `https://testnet.monadscan.com/address/0x194bd79723fC1C6BC6Cf635349f0190EbCFf59AD`
-- Public mobile-browser smoke test passed against the Vercel deploy; the remaining unchecked item is a real physical-phone pass on venue wifi.
+- Public desktop and mobile browser smoke tests passed against Cloud Run revision `clutch-00003-r8b`; the remaining unchecked item is a real physical-phone pass on venue wifi.
+- Fallback recording: `artifacts/clutch-gcp-submission-demo.mp4` (30 seconds, 1440x900, H.264).
 - The `marketCount()` failure was not a bad contract deploy: the direct `eth_call` succeeded, but the old market loader did `1 + marketCount` reads per tick, which could exceed public RPC limits once several markets or devices were active. The frontend/server now use RPC failover, and market snapshots now collapse into a single Multicall3 read.
 - Regenerate the ABI with `pnpm abi` after any contract change, or the frontend silently drifts.
 - Midroll is archived, not deleted: `docs/archive/`, `contracts/src/MidrollEscrow.sol`.

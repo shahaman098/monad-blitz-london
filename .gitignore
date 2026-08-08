@@ -6,6 +6,7 @@
 .idea/
 .vscode/
 .playwright-cli/
+.playwright-mcp/
 
 node_modules/
 dist/

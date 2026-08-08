@@ -388,12 +388,12 @@ export function MobileFeed({
 
       {/* ------------------------------------------------------- bet dock */}
       <div className="mt-dock">
-        <button type="button" className="mt-dock-q" onClick={() => setSheetOpen(true)}>
-          <strong>{marketQuestion ?? 'No bet open yet'}</strong>
-          <span className="nums">
-            {fmtMon(balance, 2)} MON <span className="mt-dock-more">Chart ›</span>
-          </span>
-        </button>
+        <div className="mt-dock-meta">
+          <span className="mt-dock-balance nums">{fmtMon(balance, 2)} MON</span>
+          <button type="button" className="mt-dock-more" onClick={() => setSheetOpen(true)}>
+            Chart <span aria-hidden="true">›</span>
+          </button>
+        </div>
         <div className="mt-dock-row">
           <button
             type="button"

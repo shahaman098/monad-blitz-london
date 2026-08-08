@@ -22,8 +22,8 @@ Creator traction markets are a latency product.
 - Frontend: React 19 + Vite + TypeScript + Tailwind v4
 - Contract: Solidity 0.8.24 + Foundry
 - Chain client: `viem`
-- Serverless onboarding: `app/api/fund.ts`
-- Deployment target: Vercel for the app, Monad testnet for the contract
+- App runtime: `app/server.ts` serves the Vite build and `app/api/fund.ts`
+- Deployment target: Google Cloud Run in `europe-west2`, Monad testnet for the contract
 
 ## Local Development
 
@@ -59,7 +59,7 @@ Required for a real submission:
 
 Live now:
 
-- App: `https://app-ten-ashen-86.vercel.app`
+- App: `https://clutch-597773359205.europe-west2.run.app/frontend`
 - Contract: `0x194bd79723fC1C6BC6Cf635349f0190EbCFf59AD`
 - MonadScan: `https://testnet.monadscan.com/address/0x194bd79723fC1C6BC6Cf635349f0190EbCFf59AD`
 
@@ -69,12 +69,12 @@ Shipped:
 - Join, trade, screen, and admin flows are implemented
 - Local Anvil cycle has been verified: join -> fund -> buy -> resolve -> redeem
 - Contract is deployed to Monad testnet and verified on MonadScan
-- App is deployed to Vercel with the production sponsor flow working
+- App is deployed to Google Cloud Run with the sponsor key mounted from Secret Manager
+- A 30-second fallback demo is saved at `artifacts/clutch-gcp-submission-demo.mp4`
 
 Still required for Monad Blitz submission:
 
 - Smoke test the phone flow on an actual phone over venue wifi
-- Record the fallback demo clip
 
 ## Docs
 
