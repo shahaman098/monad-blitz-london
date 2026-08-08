@@ -15,6 +15,7 @@
 - [x] Full cycle verified on local Anvil: join → fund → buy → resolve → redeem
 - [x] Pitch and demo runbook added at `docs/pitch.md`
 - [x] Submission hygiene pass: Clutch README, root gitignore, and initial local git history
+- [x] UI polish pass across join, trade, screen, and admin for the live pitch
 
 ## Now
 
@@ -22,6 +23,7 @@
 - [x] Deploy to Monad testnet and set `VITE_CLUTCH_ADDRESS`
 - [x] Fund the sponsor wallet with enough MON for the room starter flow
 - [x] Deploy to Vercel with project root `app`, env vars set in the dashboard
+- [x] Investigate public Monad RPC failures on `marketCount()` / market polling and harden the app against the public RPC rate limit
 - [ ] Smoke test the QR join flow from an actual phone on the venue wifi
 
 ## Before The Pitch
@@ -47,5 +49,6 @@
 - Live Monad testnet contract: `0x194bd79723fC1C6BC6Cf635349f0190EbCFf59AD`
 - Verified MonadScan page: `https://testnet.monadscan.com/address/0x194bd79723fC1C6BC6Cf635349f0190EbCFf59AD`
 - Public mobile-browser smoke test passed against the Vercel deploy; the remaining unchecked item is a real physical-phone pass on venue wifi.
+- The `marketCount()` failure was not a bad contract deploy: the direct `eth_call` succeeded, but the old market loader did `1 + marketCount` reads per tick, which could exceed public RPC limits once several markets or devices were active. The frontend/server now use RPC failover, and market snapshots now collapse into a single Multicall3 read.
 - Regenerate the ABI with `pnpm abi` after any contract change, or the frontend silently drifts.
 - Midroll is archived, not deleted: `docs/archive/`, `contracts/src/MidrollEscrow.sol`.

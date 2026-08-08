@@ -6,16 +6,8 @@ import { getBurner, requestFunding } from '../lib/wallet'
 type Step = 'wallet' | 'funding' | 'ready' | 'error'
 
 const StepRow = ({ done, active, label }: { done: boolean; active: boolean; label: string }) => (
-  <div className="flex items-center gap-3">
-    <span
-      className={`grid size-6 shrink-0 place-items-center rounded-full border text-[11px] font-bold ${
-        done
-          ? 'border-yes bg-yes text-ink'
-          : active
-            ? 'border-yes text-yes'
-            : 'border-edge text-dim'
-      }`}
-    >
+  <div className="join-step">
+    <span className={`join-step-dot ${done ? 'is-done' : active ? 'is-active' : ''}`}>
       {done ? '✓' : active ? '•' : ''}
     </span>
     <span className={done || active ? 'text-white' : 'text-dim'}>{label}</span>
@@ -84,48 +76,77 @@ export default function Join() {
   }, [step, navigate])
 
   return (
-    <main className="mx-auto flex min-h-full max-w-md flex-col justify-center gap-8 px-6 py-12">
-      <header>
-        <h1 className="text-5xl font-black tracking-tighter">CLUTCH</h1>
-        <p className="mt-2 text-balance text-lg text-dim">
-          In-play prediction markets that reprice between the plays. Live on Monad testnet.
-        </p>
+    <main className="page-shell join-shell">
+      <header className="space-y-5">
+        <p className="eyebrow">Monad testnet live market</p>
+        <div className="space-y-3">
+          <h1 className="hero-mark">
+            CLUTCH
+            <span>scan in, get funded, move the odds</span>
+          </h1>
+          <p className="hero-copy">
+            In-play prediction markets built for the room, not a dashboard. We create a burner
+            wallet, drop in testnet MON, and send you straight into the live market.
+          </p>
+        </div>
+        <div className="signal-row">
+          <div className="signal-pill">
+            <span className="status-dot" />
+            <span>real Monad transactions</span>
+          </div>
+          <div className="signal-pill">
+            <span className="nums">~0.2 MON</span>
+            <span>starter bankroll</span>
+          </div>
+        </div>
       </header>
 
-      <section className="space-y-3 rounded-2xl border border-edge bg-panel p-5">
-        <StepRow done={step !== 'wallet'} active={step === 'wallet'} label="Creating your wallet" />
-        <StepRow
-          done={step === 'ready'}
-          active={step === 'funding'}
-          label="Dropping in testnet MON"
-        />
-        <StepRow done={step === 'ready'} active={false} label="Ready to trade" />
-      </section>
-
-      <section className="space-y-1 text-sm">
-        <div className="flex justify-between">
-          <span className="text-dim">Wallet</span>
-          <span className="nums">{address ? short(address) : '—'}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-dim">Balance</span>
-          <span className="nums">{fmtMon(balance)} MON</span>
+      <section className="section-card join-stage">
+        <div className="join-stage-grid">
+          <div>
+            <p className="meta-label">Join sequence</p>
+            <div className="space-y-4">
+              <StepRow
+                done={step !== 'wallet'}
+                active={step === 'wallet'}
+                label="Creating your burner wallet"
+              />
+              <StepRow
+                done={step === 'ready'}
+                active={step === 'funding'}
+                label="Dropping in testnet MON"
+              />
+              <StepRow done={step === 'ready'} active={false} label="Routing you into the market" />
+            </div>
+          </div>
+          <div className="join-meta-grid">
+            <div className="join-meta-card">
+              <p className="meta-label">Wallet</p>
+              <p className="meta-value nums">{address ? short(address) : 'warming up...'}</p>
+            </div>
+            <div className="join-meta-card">
+              <p className="meta-label">Balance</p>
+              <p className="meta-value">
+                <strong className="nums">{fmtMon(balance)}</strong> MON
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
       {!hasContract && (
-        <p className="rounded-xl border border-no/40 bg-no/10 p-4 text-sm text-no">
+        <p className="system-error text-sm">
           <code>VITE_CLUTCH_ADDRESS</code> is not set. Deploy the contract and add it to{' '}
           <code>.env</code>.
         </p>
       )}
 
       {step === 'error' && (
-        <div className="space-y-3 rounded-xl border border-no/40 bg-no/10 p-4 text-sm">
-          <p className="text-no">{error}</p>
+        <div className="space-y-3">
+          <p className="system-error text-sm">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="w-full rounded-lg border border-edge py-2 font-semibold"
+            className="ghost-button w-full font-semibold"
           >
             Try again
           </button>
@@ -135,12 +156,12 @@ export default function Join() {
       <button
         onClick={() => navigate('/m')}
         disabled={step !== 'ready'}
-        className="w-full rounded-xl bg-yes py-4 text-lg font-bold text-ink transition disabled:opacity-30"
+        className="cta-button cta-button--yes w-full text-lg"
       >
-        {step === 'ready' ? 'Start trading' : 'Setting you up…'}
+        {step === 'ready' ? 'Enter the market' : 'Setting up your seat...'}
       </button>
 
-      <p className="text-center text-xs text-dim">
+      <p className="join-disclaimer">
         Burner wallet, testnet MON, play money. Nothing here has real value.
       </p>
     </main>

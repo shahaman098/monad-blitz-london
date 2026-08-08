@@ -151,9 +151,7 @@ export default function Trade() {
   if (marketsError) {
     return (
       <Shell>
-        <p className="rounded-xl border border-no/40 bg-no/10 p-4 text-sm text-no">
-          {marketsError}
-        </p>
+        <p className="system-error text-sm">{marketsError}</p>
       </Shell>
     )
   }
@@ -161,30 +159,44 @@ export default function Trade() {
   if (!market) {
     return (
       <Shell>
-        <p className="text-dim">Waiting for the next market to open…</p>
+        <section className="section-card trade-hero">
+          <p className="eyebrow">Market feed</p>
+          <h1 className="trade-title">Waiting for the next market to open...</h1>
+          <p className="trade-subtitle">
+            The phone will route straight into the live question as soon as the host opens it.
+          </p>
+        </section>
       </Shell>
     )
   }
 
   return (
     <Shell>
-      <header className="space-y-1">
-        <p className="text-xs uppercase tracking-widest text-dim">
-          Market #{market.id} · {resolved ? 'Resolved' : 'Live'}
+      <section className="section-card trade-hero">
+        <div className="trade-topline">
+          <p className="trade-wording">
+            Market #{market.id} · {resolved ? 'Resolved' : 'Live'}
+          </p>
+          <div className="trade-balance-pill">
+            Wallet <span className="nums">{fmtMon(balance)} MON</span>
+          </div>
+        </div>
+        <h1 className="trade-title">{market.question}</h1>
+        <p className="trade-subtitle">
+          Tap a side, take the current price, and watch the market reprice onchain in real time.
         </p>
-        <h1 className="text-2xl font-bold leading-tight text-balance">{market.question}</h1>
-      </header>
+      </section>
 
       {resolved ? (
-        <div className="rounded-2xl border border-edge bg-panel p-6 text-center">
-          <p className="text-sm uppercase tracking-widest text-dim">Settled</p>
+        <div className="section-card trade-panel text-center">
+          <p className="panel-heading">Settled market</p>
           <p className={`mt-1 text-4xl font-black ${market.outcomeYes ? 'text-yes' : 'text-no'}`}>
             {market.status === 2 ? 'CANCELLED' : market.outcomeYes ? 'YES' : 'NO'}
           </p>
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="trade-price-grid">
             <PriceButton
               side="YES"
               bps={pYes}
@@ -201,29 +213,40 @@ export default function Trade() {
             />
           </div>
 
-          <div>
-            <p className="mb-2 text-xs uppercase tracking-widest text-dim">Stake per tap</p>
-            <div className="grid grid-cols-3 gap-2">
+          <section className="section-card trade-meter-card">
+            <p className="trade-meter-label">Market pressure</p>
+            <div className="trade-meter-rail">
+              <div className="trade-meter-fill" style={{ width: `${pYes / 100}%` }} />
+            </div>
+            <div className="trade-meter-copy nums">
+              <span>YES {(pYes / 100).toFixed(0)}c</span>
+              <span>NO {((10_000 - pYes) / 100).toFixed(0)}c</span>
+            </div>
+          </section>
+
+          <section className="section-card trade-panel">
+            <p className="panel-heading">Stake per tap</p>
+            <div className="trade-chip-grid">
               {STAKES.map((s) => (
                 <button
                   key={s}
                   onClick={() => setStake(s)}
-                  className={`nums rounded-lg border py-3 text-sm font-semibold transition ${
-                    stake === s ? 'border-white bg-white text-ink' : 'border-edge text-dim'
-                  }`}
+                  className={`chip-button nums ${stake === s ? 'is-active' : ''}`}
                 >
-                  {s}
+                  <strong>{s}</strong>
+                  <span>MON</span>
                 </button>
               ))}
             </div>
-          </div>
+          </section>
         </>
       )}
 
-      <section className="space-y-2 rounded-2xl border border-edge bg-panel p-4 text-sm">
+      <section className="section-card trade-panel text-sm">
+        <p className="panel-heading">Your position</p>
         <Row label="YES shares" value={`${fmtMon(yes)}`} />
         <Row label="NO shares" value={`${fmtMon(no)}`} />
-        <Row label="Position value" value={`${fmtMon(value)} MON`} />
+        <Row label="Marked value" value={`${fmtMon(value)} MON`} />
         <Row
           label="P&L"
           value={`${pnl >= 0n ? '+' : ''}${fmtMon(pnl)} MON`}
@@ -232,18 +255,18 @@ export default function Trade() {
       </section>
 
       {!resolved && (yes > 0n || no > 0n) && (
-        <div className="grid grid-cols-2 gap-2">
+        <div className="trade-actions">
           <button
             disabled={busy || yes === 0n}
             onClick={() => cashOut(true)}
-            className="rounded-lg border border-edge py-3 text-sm font-semibold disabled:opacity-30"
+            className="trade-secondary"
           >
             Cash out YES
           </button>
           <button
             disabled={busy || no === 0n}
             onClick={() => cashOut(false)}
-            className="rounded-lg border border-edge py-3 text-sm font-semibold disabled:opacity-30"
+            className="trade-secondary"
           >
             Cash out NO
           </button>
@@ -254,33 +277,22 @@ export default function Trade() {
         <button
           disabled={busy}
           onClick={redeem}
-          className="w-full rounded-xl bg-yes py-4 text-lg font-bold text-ink disabled:opacity-30"
+          className="cta-button cta-button--yes w-full text-lg"
         >
           Redeem winnings
         </button>
       )}
 
-      {busy && (
-        <p className="flash-in text-center text-sm text-dim">{pending}… confirming on Monad</p>
-      )}
-      {err && (
-        <p className="break-words rounded-lg border border-no/40 bg-no/10 p-3 text-xs text-no">
-          {err}
-        </p>
-      )}
+      {busy && <p className="flash-in status-message">{pending}... confirming on Monad</p>}
+      {err && <p className="trade-error break-words text-xs">{err}</p>}
 
-      <footer className="space-y-1 border-t border-edge pt-4 text-xs text-dim">
-        <div className="flex justify-between">
+      <footer className="trade-footer">
+        <div className="trade-footer-row">
           <span>{short(account.address)}</span>
           <span className="nums">{fmtMon(balance)} MON</span>
         </div>
         {lastHash && (
-          <a
-            href={txUrl(lastHash)}
-            target="_blank"
-            rel="noreferrer"
-            className="block underline decoration-dotted"
-          >
+          <a href={txUrl(lastHash)} target="_blank" rel="noreferrer" className="trade-link">
             Last trade on MonadScan ↗
           </a>
         )}
@@ -290,7 +302,7 @@ export default function Trade() {
 }
 
 const Shell = ({ children }: { children: ReactNode }) => (
-  <main className="mx-auto flex min-h-full max-w-md flex-col gap-5 px-5 py-8">{children}</main>
+  <main className="page-shell trade-shell">{children}</main>
 )
 
 const Row = ({
@@ -302,11 +314,9 @@ const Row = ({
   value: string
   tone?: 'yes' | 'no'
 }) => (
-  <div className="flex justify-between">
-    <span className="text-dim">{label}</span>
-    <span
-      className={`nums font-semibold ${tone === 'yes' ? 'text-yes' : tone === 'no' ? 'text-no' : ''}`}
-    >
+  <div className="trade-row">
+    <span className="trade-row-label">{label}</span>
+    <span className={`trade-row-value nums ${tone === 'yes' ? 'text-yes' : tone === 'no' ? 'text-no' : ''}`}>
       {value}
     </span>
   </div>
@@ -328,14 +338,15 @@ const PriceButton = ({
   <button
     onClick={onClick}
     disabled={disabled}
-    className={`rounded-2xl border-2 py-8 transition active:scale-[0.98] disabled:opacity-40 ${
-      tone === 'yes' ? 'border-yes/50 bg-yes/10' : 'border-no/50 bg-no/10'
+    className={`trade-price-card active:scale-[0.985] disabled:opacity-40 ${
+      tone === 'yes' ? 'trade-price-card--yes is-yes-live' : 'trade-price-card--no is-no-live'
     }`}
   >
-    <div className={`text-sm font-bold tracking-widest ${tone === 'yes' ? 'text-yes' : 'text-no'}`}>
-      {side}
+    <div className="trade-side">{side}</div>
+    <div className="trade-odds nums">
+      <strong>{(bps / 100).toFixed(0)}</strong>
+      <span>cents</span>
     </div>
-    <div className="nums mt-1 text-5xl font-black">{(bps / 100).toFixed(0)}</div>
-    <div className="text-xs text-dim">cents</div>
+    <div className="trade-cta-copy">Tap to buy {side} at the live price</div>
   </button>
 )

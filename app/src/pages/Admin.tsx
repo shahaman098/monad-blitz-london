@@ -128,109 +128,119 @@ export default function Admin() {
     )
 
   return (
-    <main className="mx-auto flex max-w-3xl flex-col gap-6 p-6">
-      <header className="flex items-center justify-between">
-        <h1 className="text-3xl font-black tracking-tighter">CLUTCH · admin</h1>
+    <main className="page-shell admin-shell">
+      <header className="admin-header">
+        <div>
+          <p className="eyebrow">Host console</p>
+          <h1>CLUTCH admin</h1>
+          <p className="admin-subtitle">
+            Open the market, resolve the room, and keep every action visible onchain.
+          </p>
+        </div>
         {wallet ? (
-          <span className="nums text-sm text-dim">{short(address)}</span>
+          <span className="status-pill nums">{short(address)}</span>
         ) : (
-          <button onClick={connect} className="rounded-lg bg-white px-4 py-2 font-bold text-ink">
+          <button onClick={connect} className="admin-connect">
             Connect wallet
           </button>
         )}
       </header>
 
-      <section className="space-y-3 rounded-2xl border border-edge bg-panel p-5">
-        <p className="text-xs uppercase tracking-widest text-dim">Open a market</p>
-        <input
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          placeholder="Will this demo get a laugh in the first 30 seconds?"
-          className="w-full rounded-lg border border-edge bg-ink px-3 py-3 outline-none focus:border-yes"
-        />
-        <div className="flex gap-3">
+      <div className="admin-grid">
+        <section className="section-card admin-card">
+          <p className="admin-label">Open a market</p>
           <input
-            value={seed}
-            onChange={(e) => setSeed(e.target.value)}
-            className="nums w-32 rounded-lg border border-edge bg-ink px-3 py-3 outline-none focus:border-yes"
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            placeholder="Will this demo get a laugh in the first 30 seconds?"
+            className="admin-input"
           />
-          <button
-            onClick={create}
-            disabled={!wallet || !question || busy !== null}
-            className="flex-1 rounded-lg bg-yes py-3 font-bold text-ink disabled:opacity-30"
-          >
-            {busy === 'create' ? 'Opening…' : 'Open market (seed MON)'}
-          </button>
-        </div>
-      </section>
-
-      <section className="space-y-3">
-        <p className="text-xs uppercase tracking-widest text-dim">Markets</p>
-        {markets.length === 0 && <p className="text-dim">No markets yet.</p>}
-        {[...markets].reverse().map((m) => (
-          <div key={m.id} className="rounded-2xl border border-edge bg-panel p-4">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="font-semibold">
-                  #{m.id} {m.question}
-                </p>
-                <p className="nums mt-1 text-sm text-dim">
-                  YES {(priceYesBps(m) / 100).toFixed(0)}¢ · vol {fmtMon(m.volume, 3)} MON ·{' '}
-                  {m.status === 0 ? 'open' : m.status === 1 ? `resolved ${m.outcomeYes ? 'YES' : 'NO'}` : 'cancelled'}
-                </p>
-              </div>
-              <div className="flex shrink-0 gap-2">
-                {m.status === 0 ? (
-                  <>
-                    <button
-                      onClick={() => resolve(m.id, true)}
-                      disabled={!wallet || busy !== null}
-                      className="rounded-lg bg-yes px-3 py-2 text-sm font-bold text-ink disabled:opacity-30"
-                    >
-                      YES
-                    </button>
-                    <button
-                      onClick={() => resolve(m.id, false)}
-                      disabled={!wallet || busy !== null}
-                      className="rounded-lg bg-no px-3 py-2 text-sm font-bold text-ink disabled:opacity-30"
-                    >
-                      NO
-                    </button>
-                    <button
-                      onClick={() => cancel(m.id)}
-                      disabled={!wallet || busy !== null}
-                      className="rounded-lg border border-edge px-3 py-2 text-sm disabled:opacity-30"
-                    >
-                      Cancel
-                    </button>
-                  </>
-                ) : (
-                  !m.poolRedeemed && (
-                    <button
-                      onClick={() => redeemPool(m.id)}
-                      disabled={!wallet || busy !== null}
-                      className="rounded-lg border border-edge px-3 py-2 text-sm disabled:opacity-30"
-                    >
-                      Redeem pool
-                    </button>
-                  )
-                )}
-              </div>
-            </div>
+          <div className="admin-card-row">
+            <input
+              value={seed}
+              onChange={(e) => setSeed(e.target.value)}
+              className="admin-number nums"
+            />
+            <button
+              onClick={create}
+              disabled={!wallet || !question || busy !== null}
+              className="admin-button admin-button--primary flex-1"
+            >
+              {busy === 'create' ? 'Opening...' : 'Open market'}
+            </button>
           </div>
-        ))}
-      </section>
+        </section>
+
+        <section className="section-card admin-card">
+          <p className="admin-label">Markets</p>
+          {markets.length === 0 && <p className="text-dim">No markets yet.</p>}
+          <div className="admin-market-list">
+            {[...markets].reverse().map((m) => (
+              <div key={m.id} className="admin-market-card">
+                <div className="admin-market-top">
+                  <div>
+                    <p className="admin-market-title">
+                      #{m.id} {m.question}
+                    </p>
+                    <p className="admin-market-meta nums">
+                      YES {(priceYesBps(m) / 100).toFixed(0)}c · vol {fmtMon(m.volume, 3)} MON ·{' '}
+                      {m.status === 0
+                        ? 'open'
+                        : m.status === 1
+                          ? `resolved ${m.outcomeYes ? 'YES' : 'NO'}`
+                          : 'cancelled'}
+                    </p>
+                  </div>
+                  <div className="admin-market-actions">
+                    {m.status === 0 ? (
+                      <>
+                        <button
+                          onClick={() => resolve(m.id, true)}
+                          disabled={!wallet || busy !== null}
+                          className="admin-button admin-button--yes"
+                        >
+                          Resolve YES
+                        </button>
+                        <button
+                          onClick={() => resolve(m.id, false)}
+                          disabled={!wallet || busy !== null}
+                          className="admin-button admin-button--no"
+                        >
+                          Resolve NO
+                        </button>
+                        <button
+                          onClick={() => cancel(m.id)}
+                          disabled={!wallet || busy !== null}
+                          className="admin-button"
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      !m.poolRedeemed && (
+                        <button
+                          onClick={() => redeemPool(m.id)}
+                          disabled={!wallet || busy !== null}
+                          className="admin-button"
+                        >
+                          Redeem pool
+                        </button>
+                      )
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
 
       {hash && (
-        <a href={txUrl(hash)} target="_blank" rel="noreferrer" className="text-sm underline">
+        <a href={txUrl(hash)} target="_blank" rel="noreferrer" className="utility-link text-sm">
           Last tx on MonadScan ↗
         </a>
       )}
-      {err && (
-        <p className="break-words rounded-lg border border-no/40 bg-no/10 p-3 text-sm text-no">
-          {err}
-        </p>
-      )}
+      {err && <p className="trade-error break-words text-sm">{err}</p>}
     </main>
   )
 }
