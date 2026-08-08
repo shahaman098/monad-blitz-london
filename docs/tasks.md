@@ -16,12 +16,12 @@
 - [x] Pitch and demo runbook added at `docs/pitch.md`
 - [x] Submission hygiene pass: Clutch README, root gitignore, and initial local git history
 
-## Now — blocked on a funded testnet wallet
+## Now
 
-- [ ] Put a real `PRIVATE_KEY` and `SPONSOR_PRIVATE_KEY` in `.env` (from https://faucet.monad.xyz)
-- [ ] Deploy to Monad testnet and set `VITE_CLUTCH_ADDRESS`
-- [ ] Fund the sponsor wallet with enough MON for the room (~0.2 MON per phone)
-- [ ] Deploy to Vercel with project root `app`, env vars set in the dashboard
+- [x] Put a real `PRIVATE_KEY` and `SPONSOR_PRIVATE_KEY` in `.env`
+- [x] Deploy to Monad testnet and set `VITE_CLUTCH_ADDRESS`
+- [x] Fund the sponsor wallet with enough MON for the room starter flow
+- [x] Deploy to Vercel with project root `app`, env vars set in the dashboard
 - [ ] Smoke test the QR join flow from an actual phone on the venue wifi
 
 ## Before The Pitch
@@ -29,7 +29,7 @@
 - [ ] Open 2–3 markets on the demo lineup early in the day so the room is trading before we present
 - [ ] **Record a 30s fallback screen capture the moment it first works live** — non-negotiable
 - [ ] Rehearse `docs/pitch.md` against the deployed app with one phone and the projector screen
-- [ ] Verify the contract on MonadScan (`https://testnet.monadscan.com/verifyContract`)
+- [x] Verify the contract on MonadScan (`https://testnet.monadscan.com/verifyContract`)
 - [ ] Rehearse the 30-second open: latency claim first, category name never
 
 ## Nice To Have
@@ -43,5 +43,9 @@
 
 - Judging is a **live audience vote of fellow builders**, not a panel. Optimise for the room having traded before the pitch starts.
 - Use `docs/pitch.md` as the pitch source of truth: latency claim first, audience participation second, MonadScan proof third.
+- Public app URL: `https://app-ten-ashen-86.vercel.app`
+- Live Monad testnet contract: `0x194bd79723fC1C6BC6Cf635349f0190EbCFf59AD`
+- Verified MonadScan page: `https://testnet.monadscan.com/address/0x194bd79723fC1C6BC6Cf635349f0190EbCFf59AD`
+- Public mobile-browser smoke test passed against the Vercel deploy; the remaining unchecked item is a real physical-phone pass on venue wifi.
 - Regenerate the ABI with `pnpm abi` after any contract change, or the frontend silently drifts.
 - Midroll is archived, not deleted: `docs/archive/`, `contracts/src/MidrollEscrow.sol`.

@@ -1,3 +1,5 @@
+/// <reference types="node" />
+
 import {
   createPublicClient,
   createWalletClient,
@@ -96,9 +98,12 @@ export default async function handler(req: any, res: any) {
             blockTag: 'pending',
           })
           return await wallet.sendTransaction({
+            account,
+            chain: monadTestnet,
             to: address as `0x${string}`,
             value: FUND_AMOUNT,
             nonce,
+            kzg: undefined,
           })
         } catch (error) {
           lastError = error

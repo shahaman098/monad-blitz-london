@@ -36,6 +36,7 @@ pnpm dev
 Useful commands:
 
 ```bash
+pnpm env:check
 pnpm abi
 pnpm build
 pnpm contract:build
@@ -55,18 +56,23 @@ Required for a real submission:
 
 ## Submission Status
 
-Working locally:
+Live now:
+
+- App: `https://app-ten-ashen-86.vercel.app`
+- Contract: `0x194bd79723fC1C6BC6Cf635349f0190EbCFf59AD`
+- MonadScan: `https://testnet.monadscan.com/address/0x194bd79723fC1C6BC6Cf635349f0190EbCFf59AD`
+
+Shipped:
 
 - Contract and tests are in place, including the solvency fuzz suite
 - Join, trade, screen, and admin flows are implemented
 - Local Anvil cycle has been verified: join -> fund -> buy -> resolve -> redeem
+- Contract is deployed to Monad testnet and verified on MonadScan
+- App is deployed to Vercel with the production sponsor flow working
 
 Still required for Monad Blitz submission:
 
-- Deploy the contract to Monad testnet
-- Fund the sponsor wallet
-- Deploy the app to Vercel so the QR code resolves to a public URL
-- Smoke test the phone flow on venue wifi
+- Smoke test the phone flow on an actual phone over venue wifi
 - Record the fallback demo clip
 
 ## Docs

@@ -2,7 +2,7 @@
 
 ## Status
 
-Implemented and verified end to end against a local Anvil chain.
+Live on Monad testnet and Vercel. End to end flow is verified locally, and the public deploy has passed a mobile-browser smoke test against production.
 
 > The previous Midroll architecture is preserved at [`docs/archive/midroll-architecture.md`](./archive/midroll-architecture.md).
 
@@ -56,7 +56,7 @@ No database. The chain is the state.
 
 ## Environment Variables
 
-See [`.env.example`](../.env.example). Frontend vars need the `VITE_` prefix; Vite reads the repo-root `.env` via `envDir: '..'`.
+See [`.env.example`](../.env.example). Frontend vars need the `VITE_` prefix; Vite reads the repo-root `.env` via `envDir: '..'`. The root scripts `pnpm env:check` and `pnpm deploy:testnet` now load the same repo-root `.env` directly, so deploys do not depend on manually sourcing shell variables first.
 
 Keep `SPONSOR_PRIVATE_KEY` distinct from `PRIVATE_KEY` so a drained sponsor cannot block market resolution.
 
@@ -64,6 +64,7 @@ Keep `SPONSOR_PRIVATE_KEY` distinct from `PRIVATE_KEY` so a drained sponsor cann
 
 ```bash
 pnpm install
+pnpm env:check
 pnpm abi                 # regenerate the ABI after any contract change
 pnpm contract:test
 pnpm dev                 # vite dev, host:true so phones on the venue wifi can reach it
@@ -73,7 +74,7 @@ pnpm build
 Deploy:
 
 ```bash
-forge script contracts/script/DeployClutch.s.sol:DeployClutchScript --root contracts --rpc-url $MONAD_RPC_URL --broadcast
+pnpm deploy:testnet
 ```
 
 ## Known Limitations
