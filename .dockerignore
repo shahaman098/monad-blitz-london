@@ -10,4 +10,5 @@ contracts
 docs
 node_modules
 artifacts
+output
 *.log
