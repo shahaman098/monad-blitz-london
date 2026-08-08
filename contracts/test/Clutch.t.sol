@@ -25,7 +25,7 @@ contract ClutchTest is Test {
 
     function _open() internal returns (uint256 id) {
         vm.prank(owner);
-        id = clutch.createMarket{value: SEED}("Does this demo win the room?", NO_CLOSE);
+        id = clutch.createMarket{value: SEED}("Will this Reel hit 10,000 views in 30 minutes?", NO_CLOSE);
     }
 
     // ------------------------------------------------------------- pricing

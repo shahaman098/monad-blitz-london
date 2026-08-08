@@ -1,0 +1,480 @@
+/*
+ * Bet panel + price chart. Themed via CSS variables so the same markup works on
+ * the light desktop feed and the dark mobile sheet.
+ */
+
+.bp {
+  --bp-fg: #161823;
+  --bp-muted: rgba(22, 24, 35, 0.56);
+  --bp-line: rgba(22, 24, 35, 0.12);
+  --bp-fill: rgba(22, 24, 35, 0.05);
+  --bp-yes: #0a9396;
+  --bp-no: #fe2c55;
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--bp-fg);
+  font-size: 13px;
+}
+
+.bp.is-dark {
+  --bp-fg: #f2f5fa;
+  --bp-muted: rgba(255, 255, 255, 0.6);
+  --bp-line: rgba(255, 255, 255, 0.14);
+  --bp-fill: rgba(255, 255, 255, 0.08);
+  --bp-yes: #20d5ec;
+}
+
+.bp button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.bp .is-yes {
+  color: var(--bp-yes);
+}
+.bp .is-no {
+  color: var(--bp-no);
+}
+
+.bp-q {
+  font-size: 13.5px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.bp-timing {
+  margin-top: 1px;
+  font-size: 11px;
+  color: var(--bp-muted);
+}
+
+/* ------------------------------------------------------------------ chart */
+
+.chart-head {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  margin-bottom: 2px;
+}
+
+.chart-head strong {
+  font-size: 17px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--bp-yes);
+}
+
+.chart-delta {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.chart-delta.is-up {
+  color: var(--bp-yes);
+}
+.chart-delta.is-down {
+  color: var(--bp-no);
+}
+
+.chart-tag {
+  margin-left: auto;
+  font-size: 9.5px;
+  letter-spacing: 0.02em;
+  color: var(--bp-muted);
+}
+
+/* Y labels are absolutely placed against the plot, not laid out in a row. */
+.chart-plot {
+  position: relative;
+  padding-right: 22px;
+}
+
+.chart-plot svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+.chart-mid {
+  stroke: var(--bp-line);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+}
+
+.chart-cursor {
+  stroke: var(--bp-yes);
+  stroke-width: 1;
+  stroke-dasharray: 2 2;
+  opacity: 0.7;
+}
+
+.chart-y {
+  position: absolute;
+  right: 0;
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  color: var(--bp-muted);
+  line-height: 1;
+}
+
+.chart-y-top {
+  top: 0;
+}
+.chart-y-mid {
+  top: 50%;
+  transform: translateY(-50%);
+}
+.chart-y-bot {
+  bottom: 0;
+}
+
+.chart-empty {
+  border: 1px dashed var(--bp-line);
+  border-radius: 8px;
+}
+
+/* ------------------------------------------------------------------ stats */
+
+.bp-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 6px 0;
+  border-top: 1px solid var(--bp-line);
+  border-bottom: 1px solid var(--bp-line);
+}
+
+.bp-stats div {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.bp-stats span {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--bp-muted);
+}
+
+.bp-stats strong {
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+/* ------------------------------------------------------------- buy / sell */
+
+.bp-mode {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 8px;
+  background: var(--bp-fill);
+}
+
+.bp-mode button {
+  flex: 1;
+  padding: 5px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--bp-muted);
+}
+
+.bp-mode button.is-active {
+  background: var(--bp-fg);
+  color: #fff;
+}
+
+.bp.is-dark .bp-mode button.is-active {
+  background: #fff;
+  color: #161823;
+}
+
+.bp-mode button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.bp-sides {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.bp-side {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 8px;
+  border-radius: 10px;
+  border: 1.5px solid var(--bp-line);
+  transition: transform 100ms ease;
+}
+
+.bp-side span {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--bp-muted);
+}
+
+.bp-side strong {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.bp-side:active {
+  transform: scale(0.98);
+}
+
+.bp-yes.is-active {
+  border-color: var(--bp-yes);
+  background: color-mix(in srgb, var(--bp-yes) 12%, transparent);
+  color: var(--bp-yes);
+}
+
+.bp-no.is-active {
+  border-color: var(--bp-no);
+  background: color-mix(in srgb, var(--bp-no) 12%, transparent);
+  color: var(--bp-no);
+}
+
+.bp-yes.is-active span,
+.bp-no.is-active span {
+  color: inherit;
+}
+
+/* ----------------------------------------------------------------- amount */
+
+.bp-amount {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--bp-line);
+  border-radius: 10px;
+}
+
+.bp-amount label {
+  font-size: 12px;
+  color: var(--bp-muted);
+}
+
+.bp-amount input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: none;
+  color: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  text-align: right;
+}
+
+.bp-amount span {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--bp-muted);
+}
+
+.bp-chips {
+  display: flex;
+  gap: 6px;
+}
+
+.bp-chips button {
+  flex: 1;
+  padding: 4px 3px;
+  border-radius: 6px;
+  background: var(--bp-fill);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.bp-chips button.is-active {
+  background: var(--bp-fg);
+  color: #fff;
+}
+
+.bp.is-dark .bp-chips button.is-active {
+  background: #fff;
+  color: #161823;
+}
+
+/* ---------------------------------------------------------------- payout */
+
+.bp-payout {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  background: var(--bp-fill);
+}
+
+.bp-payout div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.bp-payout span {
+  font-size: 11px;
+  color: var(--bp-muted);
+}
+
+.bp-payout strong {
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.bp-payout div:first-child strong {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+/* ---------------------------------------------------------------- submit */
+
+.bp-submit {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  background: var(--bp-fg);
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 800;
+  transition: transform 100ms ease;
+}
+
+.bp.is-dark .bp-submit {
+  background: #fff;
+  color: #161823;
+}
+
+.bp-submit.is-yes {
+  background: var(--bp-yes);
+  color: #04252a;
+}
+
+.bp-submit.is-no {
+  background: var(--bp-no);
+  color: #fff;
+}
+
+.bp-submit:active:not(:disabled) {
+  transform: scale(0.985);
+}
+
+.bp-submit:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* -------------------------------------------------------------- position */
+
+.bp-position {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 7px;
+  border-top: 1px solid var(--bp-line);
+}
+
+.bp-position div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.bp-position span {
+  font-size: 11px;
+  color: var(--bp-muted);
+}
+
+.bp-position strong {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.bp-settled {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid var(--bp-line);
+  border-radius: 10px;
+}
+
+.bp-settled p {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--bp-muted);
+}
+
+.bp-settled strong {
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.bp-note {
+  font-size: 12px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.bp-note.is-error {
+  color: var(--bp-no);
+}
+
+/* -------------------------------------------------------------- activity */
+
+.bp-activity {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 7px;
+  border-top: 1px solid var(--bp-line);
+}
+
+.bp-activity-head {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--bp-muted);
+  margin-bottom: 4px;
+}
+
+.bp-activity-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 8px;
+  align-items: baseline;
+  padding: 3px 5px;
+  border-radius: 6px;
+  font-size: 11px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.bp-activity-row:nth-child(odd) {
+  background: var(--bp-fill);
+}
+
+.bp-activity-row > span:first-child {
+  color: var(--bp-muted);
+}
+
+.bp-activity-price {
+  color: var(--bp-muted);
+}

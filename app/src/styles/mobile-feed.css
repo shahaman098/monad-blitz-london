@@ -1,0 +1,717 @@
+/*
+ * Mobile feed — full-bleed vertical video with an overlaid action rail,
+ * a snap-scrolling reel list, a bet dock, and a bottom nav bar.
+ * Scoped under .mt-* so it stays independent of the desktop layout.
+ */
+
+.mt-app {
+  --mt-red: #fe2c55;
+  --mt-nav: 52px;
+  /* Must match the dock's real rendered height or the caption clips behind it. */
+  --mt-dock: 104px;
+
+  position: fixed;
+  inset: 0;
+  background: #000;
+  color: #fff;
+  font-family:
+    ui-sans-serif, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+.mt-app button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.mt-app a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* --------------------------------------------------------------- scroller */
+
+.mt-scroller {
+  height: 100%;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mt-scroller::-webkit-scrollbar {
+  display: none;
+}
+
+.mt-slide {
+  position: relative;
+  height: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  overflow: hidden;
+}
+
+.mt-slide .social-embed-shell {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  min-height: 0;
+}
+
+.mt-slide iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border: 0;
+  display: block;
+}
+
+/* Legibility scrims — top for the tabs, bottom for caption + dock. */
+.mt-slide::before,
+.mt-slide::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+}
+
+.mt-slide::before {
+  top: 0;
+  height: 140px;
+  background: linear-gradient(rgba(0, 0, 0, 0.5), transparent);
+}
+
+.mt-slide::after {
+  bottom: 0;
+  height: 320px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.72));
+}
+
+/* ------------------------------------------------------------------- top */
+
+.mt-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 4;
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.88);
+  padding: calc(env(safe-area-inset-top, 0px) + 12px) 12px 8px;
+  backdrop-filter: blur(8px);
+}
+
+.mt-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.mt-tabs button {
+  position: relative;
+  padding: 4px 2px;
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.65);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.mt-tabs button.is-active {
+  color: #fff;
+  font-weight: 800;
+}
+
+.mt-tabs button.is-active::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -3px;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 2.5px;
+  border-radius: 2px;
+  background: #fff;
+}
+
+.mt-top-btn {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  color: #fff;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.5));
+}
+
+/* ---------------------------------------------------- stories + mode */
+
+.mt-strip {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 58px);
+  left: 0;
+  right: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 64px;
+  background: rgba(0, 0, 0, 0.88);
+  padding: 0 10px 4px;
+  backdrop-filter: blur(8px);
+}
+
+.mt-stories {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 2px 0 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.mt-stories::-webkit-scrollbar {
+  display: none;
+}
+
+.mt-story {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+  width: 54px;
+  font-size: 9.5px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.mt-story .creator-avatar {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: linear-gradient(140deg, #20d5ec, #fe2c55);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+}
+
+.mt-story.is-following .creator-avatar {
+  border-color: var(--mt-red);
+}
+
+.mt-story.is-active .creator-avatar {
+  border-color: #fff;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);
+}
+
+.mt-story span {
+  max-width: 54px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mt-mode {
+  display: flex;
+  flex-shrink: 0;
+  padding: 2px;
+  border-radius: 92px;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.mt-mode button {
+  padding: 5px 11px;
+  border-radius: 92px;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.mt-mode button.is-active {
+  background: #fff;
+  color: #000;
+}
+
+/* -------------------------------------------------------------- swipe deck */
+
+.mt-deck {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: calc(env(safe-area-inset-top, 0px) + 118px) 14px
+    calc(var(--mt-nav) + var(--mt-dock) + 30px);
+}
+
+.mt-card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  max-width: 420px;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #111;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+  touch-action: pan-y;
+  will-change: transform;
+}
+
+.mt-card .social-embed-shell {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  min-height: 0;
+}
+
+.mt-card iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border: 0;
+  pointer-events: none;
+}
+
+.mt-card-scrim {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 45%;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+  pointer-events: none;
+}
+
+.mt-card-meta {
+  position: absolute;
+  inset: auto 12px 12px 12px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.mt-card-meta strong {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.mt-card-meta p {
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.mt-hint {
+  position: absolute;
+  top: 18px;
+  padding: 7px 13px;
+  border-radius: 8px;
+  border: 3px solid currentColor;
+  font-size: 19px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  opacity: 0;
+  transition: opacity 90ms linear;
+}
+
+.mt-hint-yes {
+  left: 16px;
+  color: #20d5ec;
+  transform: rotate(-14deg);
+}
+
+.mt-hint-no {
+  right: 16px;
+  color: var(--mt-red);
+  transform: rotate(14deg);
+}
+
+.mt-deck-help {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--mt-nav) + var(--mt-dock) + 8px);
+  text-align: center;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.65);
+  pointer-events: none;
+}
+
+/* ------------------------------------------------------------------ rail */
+
+.mt-rail {
+  position: absolute;
+  right: 8px;
+  bottom: calc(var(--mt-nav) + var(--mt-dock) + 24px);
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.mt-rail-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+}
+
+.mt-rail-item button,
+.mt-rail-item a {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 40px;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.5));
+  transition: transform 120ms ease;
+}
+
+.mt-rail-item button:active {
+  transform: scale(0.88);
+}
+
+.mt-rail-item.is-liked {
+  color: var(--mt-red);
+}
+
+.mt-rail-avatar {
+  position: relative;
+  margin-bottom: 8px;
+}
+
+.mt-rail-avatar .creator-avatar {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  object-fit: cover;
+  background: linear-gradient(140deg, #20d5ec, #fe2c55);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.mt-rail-follow {
+  position: absolute;
+  left: 50%;
+  bottom: -10px;
+  transform: translateX(-50%);
+  display: grid;
+  place-items: center;
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+  background: var(--mt-red);
+  color: #fff;
+}
+
+.mt-rail-follow.is-following {
+  background: #fff;
+  color: var(--mt-red);
+}
+
+/* Spinning record, as on the reference feed. */
+.mt-disc {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(140deg, #2a2a2a, #000);
+  border: 5px solid #191919;
+  animation: mt-spin 5s linear infinite;
+}
+
+@keyframes mt-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mt-disc {
+    animation: none;
+  }
+}
+
+/* ----------------------------------------------------------------- meta */
+
+.mt-meta {
+  position: absolute;
+  left: 12px;
+  right: 78px;
+  bottom: calc(var(--mt-nav) + var(--mt-dock) + 12px);
+  z-index: 4;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+}
+
+.mt-meta-author {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 16px;
+  font-weight: 800;
+  margin-bottom: 5px;
+}
+
+.mt-meta-caption {
+  font-size: 14px;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.mt-meta-caption.is-open {
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  overflow: visible;
+}
+
+.mt-meta-music {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 7px;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* ------------------------------------------------------------- bet dock */
+
+.mt-dock {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: var(--mt-nav);
+  z-index: 5;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mt-dock-q {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.72);
+  margin-bottom: 6px;
+}
+
+.mt-dock-q strong {
+  color: #fff;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mt-dock-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 8px;
+}
+
+.mt-dock-row button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 42px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 800;
+  transition: transform 100ms ease;
+}
+
+.mt-dock-row button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.mt-dock-row button:disabled {
+  opacity: 0.45;
+}
+
+.mt-yes {
+  background: #20d5ec;
+  color: #04252a;
+}
+
+.mt-no {
+  background: var(--mt-red);
+  color: #fff;
+}
+
+.mt-stake {
+  padding: 0 12px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+
+.mt-dock-note {
+  margin-top: 6px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mt-dock-note.is-error {
+  color: #ff8fa1;
+  white-space: normal;
+}
+
+.mt-dock-q {
+  width: 100%;
+  text-align: left;
+  align-items: baseline;
+}
+
+.mt-dock-more {
+  margin-left: 6px;
+  color: #20d5ec;
+  font-weight: 700;
+}
+
+/* ------------------------------------------------------------ market sheet */
+
+.mt-sheet-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: flex-end;
+}
+
+.mt-sheet {
+  width: 100%;
+  max-height: 88%;
+  display: flex;
+  flex-direction: column;
+  background: #0e1117;
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  animation: mt-sheet-in 200ms ease-out;
+}
+
+@keyframes mt-sheet-in {
+  from {
+    transform: translateY(18px);
+    opacity: 0.6;
+  }
+}
+
+.mt-sheet-grip {
+  align-self: center;
+  width: 42px;
+  height: 4px;
+  margin: 10px 0 4px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.3);
+  flex-shrink: 0;
+}
+
+.mt-sheet-body {
+  overflow-y: auto;
+  padding: 8px 16px calc(20px + env(safe-area-inset-bottom, 0px));
+}
+
+/* The panel renders on a dark sheet here. */
+.mt-sheet .bp {
+  --bp-fg: #f2f5fa;
+  --bp-muted: rgba(255, 255, 255, 0.6);
+  --bp-line: rgba(255, 255, 255, 0.14);
+  --bp-fill: rgba(255, 255, 255, 0.08);
+  --bp-yes: #20d5ec;
+}
+
+.mt-sheet .bp-mode button.is-active,
+.mt-sheet .bp-chips button.is-active,
+.mt-sheet .bp-submit:not(.is-yes):not(.is-no) {
+  background: #fff;
+  color: #161823;
+}
+
+/* -------------------------------------------------------------- bottom nav */
+
+.mt-nav {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 6;
+  height: calc(var(--mt-nav) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: center;
+  background: #000;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mt-nav button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.mt-nav button.is-active {
+  color: #fff;
+}
+
+.mt-nav-plus {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 30px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #20d5ec, #fe2c55);
+  color: #fff;
+}
+
+/* Above the desktop breakpoint the three-column layout takes over. */
+@media (min-width: 1100px) {
+  .mt-app {
+    display: none;
+  }
+}

@@ -4,49 +4,49 @@
 
 ## One-Line Idea
 
-Clutch is the in-play prediction market that only works on a fast chain — sub-second markets that open, trade, and settle between the plays.
+Clutch is a social network for creator momentum markets that only works on a fast chain: scroll reels inside Clutch, follow creators, react to posts, and trade YES/NO on whether a video will hit a view, like, or comment target before a deadline.
 
 ## Problem
 
-In-play betting is the majority of live sports wagering and is structurally impossible onchain today. A live market must open, reprice, and resolve inside seconds. On a 12-second-block chain every in-play price is stale before it fills, which is why onchain prediction markets only do long-horizon questions and why all live flow sits with centralised books that can void a bet, restrict a winning account, and never show the book.
+Creator growth is volatile and public, but the market around it is opaque. Fans, creators, and sponsors can see views, likes, and comments move in real time, yet there is no lightweight way to price that momentum as it happens. On a slow chain, a market on whether a clip crosses a threshold is stale before the next wave of engagement arrives.
 
 ## Target Users
 
-- Primary user: live sports and esports in-play traders
-- Secondary user: streamers and event hosts who want a market on their own event
-- Decision maker: the host who opens and resolves markets
-- Beneficiary: traders who currently accept opaque odds from a centralised book
+- Primary user: fans and creator communities who want to trade live content momentum
+- Secondary user: creators, streamers, and launch teams who want an interactive market around a post
+- Decision maker: the host who opens a metric market and resolves it from public platform numbers
+- Beneficiary: traders who want transparent odds instead of opaque virality claims
 
 ## Why Monad
 
 Strip Monad out and the product ceases to exist:
 
-- ~400ms blocks and ~800ms finality let a market reprice between plays
-- Parallel execution lets a whole room trade the same market without serialising into a queue
-- Cheap gas makes a sub-penny in-play trade rational
+- ~400ms blocks and ~800ms finality let a market reprice while views, likes, and comments are moving
+- Parallel execution lets a whole room trade the same viral moment without serialising into a queue
+- Cheap gas makes small testnet trades rational for a fast audience demo
 
 On a 12-second chain this is not a worse Clutch, it is not Clutch.
 
 ## Core User Journey
 
-1. A market opens on whatever is happening right now.
-2. The room scans a QR code, gets a funded burner wallet in seconds, and trades YES/NO from their phones.
-3. The big screen shows the odds repricing live, every trade a real Monad transaction with a MonadScan link.
-4. The host resolves. Winning shares redeem 1:1 while the demo is still running.
+1. The host picks one of the built-in TikTok-sourced clips and opens a market such as "Will this clip hit 10,000 views in 30 minutes?"
+2. The room scans a QR code, gets a funded burner wallet in seconds, browses in scroll mode or swipe mode, watches the official platform player inside Clutch, and trades YES/NO from their phones.
+3. The big screen shows the same in-app TikTok-sourced clip beside live odds, every trade a real Monad transaction with a MonadScan link.
+4. The host checks the public platform metric and resolves. Winning shares redeem 1:1 while the demo is still running.
 
 ## MVP Scope
 
 - Must have: CPMM binary markets in a single contract, collateralised in native MON
 - Must have: QR → funded burner wallet → first trade with no MetaMask and no faucet
-- Must have: phone trading UI with live prices, position, and P&L
-- Must have: big-screen dashboard with live odds chart, trade feed, trades/sec, and QR
-- Must have: owner console to open and resolve markets live
+- Must have: phone social feed with vertical scroll mode, Tinder-style swipe mode, creator profiles, follows, likes, saves, comments, live prices, position, and P&L
+- Must have: big-screen dashboard with the active reel, live odds chart, trade feed, trades/sec, and QR
+- Must have: owner console to open time-boxed creator metric markets from the built-in reel catalog and resolve them live
 
 ## Nice To Have
 
 - Stretch: MonadScan contract verification
 - Stretch: multiple simultaneous markets on the big screen
-- Stretch: a real esports/football feed (PandaScore, API-Football) driving auto-resolution
+- Stretch: platform metric ingestion for YouTube, TikTok, or X
 
 ## Non-Goals
 
@@ -56,7 +56,7 @@ On a 12-second chain this is not a worse Clutch, it is not Clutch.
 
 ## Success Criteria
 
-- Demo success looks like: the room scans, trades, watches the odds convulse on the big screen, and sees payouts land before the pitch ends
+- Demo success looks like: the room scans, trades on whether a clip hits a visible metric target, watches the odds move on the big screen, and sees payouts land before the pitch ends
 - By the end of the hackathon: contract deployed and seeded on Monad testnet, app on Vercel, one recorded fallback capture
 
 ## Constraints

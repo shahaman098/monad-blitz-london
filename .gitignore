@@ -24,3 +24,8 @@ venv/
 
 *.log
 *.tmp
+
+# Superseded local demo media; the feed now uses verified TikTok embeds/assets.
+app/public/media/avatars/
+app/public/media/reel-*.mp4
+app/public/media/sample-*.mp4

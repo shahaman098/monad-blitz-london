@@ -4,6 +4,7 @@ import {
   createPublicClient,
   createWalletClient,
   defineChain,
+  fallback,
   http,
   isAddress,
   parseEther,
@@ -15,10 +16,23 @@ import { privateKeyToAccount } from 'viem/accounts'
  * QR code and be trading in seconds, so we cannot put a faucet or a wallet
  * install in front of them. This endpoint funds a fresh burner once.
  *
- * Env: SPONSOR_PRIVATE_KEY, MONAD_RPC_URL, FUND_AMOUNT_MON, FUND_MAX_WALLETS
+ * Env: SPONSOR_PRIVATE_KEY, MONAD_RPC_URL or MONAD_RPC_URLS, FUND_AMOUNT_MON,
+ * FUND_MAX_WALLETS
  */
 
-const RPC = process.env.MONAD_RPC_URL ?? 'https://testnet-rpc.monad.xyz'
+const DEFAULT_RPC_URLS = ['https://rpc.ankr.com/monad_testnet', 'https://testnet-rpc.monad.xyz']
+
+function parseRpcUrls(raw?: string): string[] {
+  return [...new Set((raw ?? '').split(',').map((url) => url.trim()).filter(Boolean))]
+}
+
+const RPC_URLS = (() => {
+  const configured = parseRpcUrls(process.env.MONAD_RPC_URLS)
+  if (configured.length > 0) return configured
+  const primary = process.env.MONAD_RPC_URL?.trim()
+  return [...new Set([primary, ...DEFAULT_RPC_URLS].filter((url): url is string => Boolean(url)))]
+})()
+
 const FUND_AMOUNT = parseEther(process.env.FUND_AMOUNT_MON ?? '0.2')
 // Below this, a wallet is considered empty and eligible for a top-up.
 const TOPUP_FLOOR = FUND_AMOUNT / 4n
@@ -28,11 +42,12 @@ const monadTestnet = defineChain({
   id: Number(process.env.MONAD_CHAIN_ID ?? 10143),
   name: 'Monad Testnet',
   nativeCurrency: { name: 'Monad', symbol: 'MON', decimals: 18 },
-  rpcUrls: { default: { http: [RPC] } },
+  rpcUrls: { default: { http: RPC_URLS } },
   testnet: true,
 })
 
-const publicClient = createPublicClient({ chain: monadTestnet, transport: http(RPC) })
+const transport = fallback(RPC_URLS.map((url) => http(url)))
+const publicClient = createPublicClient({ chain: monadTestnet, transport })
 
 const served = new Set<string>()
 // Serialise sends so a room full of simultaneous joins cannot race the nonce.
@@ -87,7 +102,7 @@ export default async function handler(req: any, res: any) {
     }
 
     const account = privateKeyToAccount(pk as `0x${string}`)
-    const wallet = createWalletClient({ account, chain: monadTestnet, transport: http(RPC) })
+    const wallet = createWalletClient({ account, chain: monadTestnet, transport })
 
     const hash = await enqueue(async () => {
       let lastError: unknown

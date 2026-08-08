@@ -1,6 +1,6 @@
-import { createWalletClient, http, type Account } from 'viem'
+import { createWalletClient, fallback, http, type Account } from 'viem'
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
-import { monadTestnet, RPC_URL } from './chain'
+import { monadTestnet, RPC_URLS } from './chain'
 
 const KEY = 'clutch.burner.v2'
 
@@ -24,7 +24,11 @@ export function resetBurner(): Account {
 }
 
 export function burnerWallet(account: Account) {
-  return createWalletClient({ account, chain: monadTestnet, transport: http(RPC_URL) })
+  return createWalletClient({
+    account,
+    chain: monadTestnet,
+    transport: fallback(RPC_URLS.map((url) => http(url))),
+  })
 }
 
 export type FundResult = { ok: boolean; funded: boolean; hash?: string; error?: string }

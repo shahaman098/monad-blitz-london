@@ -78,15 +78,16 @@ export default function Join() {
   return (
     <main className="page-shell join-shell">
       <header className="space-y-5">
-        <p className="eyebrow">Monad testnet live market</p>
+        <p className="eyebrow">Monad testnet social betting</p>
         <div className="space-y-3">
           <h1 className="hero-mark">
             CLUTCH
-            <span>scan in, get funded, move the odds</span>
+            <span>scroll reels, bet the outcome</span>
           </h1>
           <p className="hero-copy">
-            In-play prediction markets built for the room, not a dashboard. We create a burner
-            wallet, drop in testnet MON, and send you straight into the live market.
+            Watch reels inside Clutch and bet on whether they hit view, like, or comment targets
+            before the clock runs out. We create a burner wallet, drop in testnet MON, and send you
+            into the live feed.
           </p>
         </div>
         <div className="signal-row">
@@ -116,7 +117,7 @@ export default function Join() {
                 active={step === 'funding'}
                 label="Dropping in testnet MON"
               />
-              <StepRow done={step === 'ready'} active={false} label="Routing you into the market" />
+              <StepRow done={step === 'ready'} active={false} label="Routing you into the Clutch feed" />
             </div>
           </div>
           <div className="join-meta-grid">
@@ -158,7 +159,7 @@ export default function Join() {
         disabled={step !== 'ready'}
         className="cta-button cta-button--yes w-full text-lg"
       >
-        {step === 'ready' ? 'Enter the market' : 'Setting up your seat...'}
+        {step === 'ready' ? 'Enter Clutch' : 'Setting up your wallet...'}
       </button>
 
       <p className="join-disclaimer">

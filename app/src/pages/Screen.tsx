@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import QRCode from 'qrcode'
+import { SocialEmbed } from '../components/SocialEmbed'
 import { CLUTCH_ADDRESS, addrUrl, fmtMon, hasContract, short, txUrl } from '../lib/chain'
+import { parseMarketPrompt, type ParsedMarketPrompt } from '../lib/marketPrompt'
+import { REELS } from '../lib/reels'
 import {
+  marketTimingLabel,
   priceYesBps,
   useBlockNumber,
   useMarkets,
@@ -44,8 +48,26 @@ function Chart({ history }: { history: number[] }) {
   )
 }
 
+function MediaStage({ prompt }: { prompt: ParsedMarketPrompt | null }) {
+  const reel = prompt?.reel ?? REELS[0]
+  const fallback = !prompt?.reel
+
+  return (
+    <div className="media-stage">
+      <SocialEmbed reel={reel} />
+      <div className="media-stage-source">
+        <strong>{reel.displayName}</strong>
+        <span>
+          {fallback ? 'demo reel fallback · ' : ''}
+          Official {reel.platform} post · {reel.creator}
+        </span>
+      </div>
+    </div>
+  )
+}
+
 export default function Screen() {
-  const { markets, live } = useMarkets(500)
+  const { markets, live } = useMarkets(1500)
   const { trades, tps } = useTradeFeed(24)
   const block = useBlockNumber()
   const history = usePriceHistory(live)
@@ -62,6 +84,7 @@ export default function Screen() {
   }, [joinUrl])
 
   const pYes = live ? priceYesBps(live) : 5000
+  const livePrompt = live ? parseMarketPrompt(live.question) : null
   const traders = useMemo(() => new Set(trades.map((t) => t.trader.toLowerCase())).size, [trades])
   const volume = useMemo(() => markets.reduce((acc, m) => acc + m.volume, 0n), [markets])
 
@@ -69,10 +92,10 @@ export default function Screen() {
     <main className="page-shell screen-shell">
       <header className="screen-header">
         <div>
-          <p className="eyebrow">Live room market</p>
+          <p className="eyebrow">Live room bet</p>
           <h1>CLUTCH</h1>
           <p className="screen-subtitle">
-            in-play prediction markets on Monad testnet
+            real-time betting on creator traction
           </p>
         </div>
         <div className="screen-header-right">
@@ -80,7 +103,7 @@ export default function Screen() {
             block <strong>{block?.toString() ?? '---'}</strong>
           </span>
           <span className={`screen-pill nums ${tps > 0 ? 'is-live' : ''}`}>
-            {tps.toFixed(1)} trades/sec
+            {tps.toFixed(1)} bets/sec
           </span>
         </div>
       </header>
@@ -96,11 +119,17 @@ export default function Screen() {
           <div className="arena-status">
             <div>
               <p className="eyebrow">Current question</p>
-              <p className="arena-question">{live?.question ?? 'No market open'}</p>
-              <p className="arena-note">Every click below becomes a real Monad testnet fill.</p>
+              <p className="arena-question">{livePrompt?.question ?? 'No bet live'}</p>
+              <p className="arena-note">
+                {live
+                  ? `${marketTimingLabel(live)} · every bet is a real Monad testnet fill`
+                  : 'Create a reel bet from the host console.'}
+              </p>
             </div>
-            <div className="arena-badge nums">{markets.length} markets in rotation</div>
+            <div className="arena-badge nums">{markets.length} bets in rotation</div>
           </div>
+
+          <MediaStage prompt={livePrompt} />
 
           <div className="arena-prices">
             <div className="arena-side arena-side--yes">
@@ -134,26 +163,26 @@ export default function Screen() {
           </div>
 
           <div className="arena-stats">
-            <Stat label="Volume traded" value={`${fmtMon(volume, 2)} MON`} />
-            <Stat label="Active traders" value={traders.toString()} />
+            <Stat label="Bet volume" value={`${fmtMon(volume, 2)} MON`} />
+            <Stat label="Active bettors" value={traders.toString()} />
             <Stat label="Live contract" value={CLUTCH_ADDRESS ? short(CLUTCH_ADDRESS, 6, 4) : 'unset'} />
           </div>
         </section>
 
         <aside className="screen-rail">
           <section className="section-card qr-card">
-            <p className="eyebrow text-[#865300]">Join the room</p>
+            <p className="eyebrow text-[#865300]">Bet the reel</p>
             <div className="qr-frame">{qr && <img src={qr} alt="Join Clutch" className="mx-auto w-full max-w-[240px]" />}</div>
             <p className="qr-copy">
-              <strong>Scan to trade</strong>
+              <strong>Scan to bet</strong>
               <span className="nums">{joinUrl.replace(/^https?:\/\//, '')}</span>
             </p>
           </section>
 
           <section className="section-card feed-card">
-            <p className="panel-heading">Live fills</p>
+            <p className="panel-heading">Live bets</p>
             <div className="feed-list">
-              {trades.length === 0 && <div className="text-sm text-dim">no trades yet</div>}
+              {trades.length === 0 && <div className="text-sm text-dim">no bets yet</div>}
               {trades.map((t) => (
                 <div key={t.key} className="feed-item flash-in">
                   <span className={`feed-item-side ${t.isYes ? 'is-yes' : 'is-no'}`}>
@@ -183,7 +212,7 @@ export default function Screen() {
         <a href={addrUrl(CLUTCH_ADDRESS)} target="_blank" rel="noreferrer" className="nums">
           {CLUTCH_ADDRESS || 'contract not set'} ↗
         </a>
-        <span>fast enough for the room, transparent enough for MonadScan</span>
+        <span>viral momentum, priced live and settled on Monad testnet</span>
       </footer>
     </main>
   )

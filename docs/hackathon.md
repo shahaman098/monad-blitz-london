@@ -14,7 +14,7 @@
 - Treat this as a vibe-coding sprint: fast iteration, clear MVP, minimal ceremony.
 - Keep the build path compatible with Monad if the app needs wallet, contract, or testnet support.
 - MonadScan is available on testnet and should be treated as part of the default demo surface for links, verification, and transaction proof.
-- The winning Clutch angle is not "prediction markets"; it is "in-play markets become possible when Monad makes latency low enough for the room to trade between moments."
+- The winning Clutch angle is not "prediction markets"; it is "creator momentum becomes tradeable when Monad makes latency low enough for the room to reprice views, likes, and comments live."
 
 ## Submission Notes
 

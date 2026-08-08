@@ -2,7 +2,7 @@
 
 ## Done
 
-- [x] Pick the idea: Clutch, in-play prediction markets (see `docs/product.md`)
+- [x] Pick the idea: Clutch, creator momentum markets (see `docs/product.md`)
 - [x] `Clutch.sol` — CPMM binary markets, buy/sell/resolve/redeem, native MON collateral
 - [x] 19 Foundry tests green, including a 256-run fuzz on the solvency invariant
 - [x] `DeployClutch.s.sol` with optional seeded first market
@@ -16,14 +16,37 @@
 - [x] Pitch and demo runbook added at `docs/pitch.md`
 - [x] Submission hygiene pass: Clutch README, root gitignore, and initial local git history
 - [x] UI polish pass across join, trade, screen, and admin for the live pitch
+- [x] Replace demo-specific seeded market copy with neutral default wording
 
 ## Now
 
+- [ ] Finalize, commit, deploy, and record the submission-ready TikTok build
+- [x] Add the verified TikTok profile photo for every creator in the built-in feed
+- [x] Replace mismatched local reel files with verified official TikTok embeds for every catalog account
+- [x] Replace external handoff cards with TikTok-sourced reels and a local playable video fallback
 - [x] Put a real `PRIVATE_KEY` and `SPONSOR_PRIVATE_KEY` in `.env`
 - [x] Deploy to Monad testnet and set `VITE_CLUTCH_ADDRESS`
 - [x] Fund the sponsor wallet with enough MON for the room starter flow
 - [x] Deploy to Vercel with project root `app`, env vars set in the dashboard
 - [x] Investigate public Monad RPC failures on `marketCount()` / market polling and harden the app against the public RPC rate limit
+- [x] Pivot the MVP framing to creator metric markets for Reels and YouTube views, likes, and comments
+- [x] Show the live Reel / YouTube source on the projector while the room votes YES/NO
+- [x] Replace pasted media URLs with a built-in TikTok-sourced feed that plays via local video fallback
+- [x] Add social-network surfaces around the reel feed: creator stories, profiles, follows, likes, saves, comments, and feed tabs
+- [x] Final readiness pass: social-betting copy, build, lint, env check, and contract tests
+- [x] Harden reel playback: every mounted reel force-plays muted inline with tap-to-play retry
+- [x] Make the phone feed resilient to Monad RPC rate limits so reel playback never gets replaced by raw errors
+- [x] Add phone feed modes: vertical scroll and Tinder-style swipe deck over playable reel cards
+- [x] Reduce betting friction with a sticky instant-bet dock and swipe-mode YES/NO actions
+- [x] Validate TikTok source links in the built-in feed (no scrape, no paste-URL)
+- [x] Make the live feed TikTok-only so videos actually play in-app
+- [x] Switch reel playback to local MP4s so the feed never depends on blank IG/TikTok embed frames
+- [x] Make `/m` use Claude's DesktopFeed UI only; remove the old mobile social-feed shell
+- [x] Correct the built-in feed to TikTok-only source/profile pairs with exact post links
+- [x] Fix demo-blocking Monad gas bug: writes now pass an explicit gas limit (see `docs/architecture.md`)
+- [x] Make tx errors readable (viem's multi-line revert text was being truncated to a dangling header)
+- [x] Verify a real bet end to end against the deployed testnet contract from the app
+- [x] Route the social-feed icon barrel through Meta's open-source Astryx icon component
 - [ ] Smoke test the QR join flow from an actual phone on the venue wifi
 
 ## Before The Pitch
@@ -39,7 +62,7 @@
 - [ ] Multiple simultaneous markets on the big screen
 - [ ] Leaderboard of room P&L — strong audience-vote hook
 - [ ] Sound on trade
-- [ ] Real feed integration (PandaScore / API-Football) for the "this is a real product" slide
+- [ ] Platform metric ingestion for YouTube, TikTok, or X
 
 ## Working Notes
 

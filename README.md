@@ -1,21 +1,21 @@
 # Clutch
 
-Clutch is an in-play prediction market built for Monad testnet. The pitch is simple: this product only works on a fast chain. A host opens a live YES/NO market, the room scans a QR code, receives testnet MON automatically, trades from their phones, and watches the odds move on the projector in real time.
+Clutch is a social network for creator-momentum markets built for Monad testnet. A host opens a YES/NO market on one of the built-in TikTok-sourced clips, the projector shows that content, the room scans a QR code, receives testnet MON automatically, browses in scroll mode or swipe mode, reacts to creators, votes from their phones, and watches the odds move in real time.
 
 ## Why Monad
 
-In-play markets are a latency product.
+Creator traction markets are a latency product.
 
-- Slow chains make live odds stale before they fill.
+- Slow chains make live odds stale while views, likes, and comments are still moving.
 - Monad's fast blocks make room-scale repricing believable.
 - Cheap testnet transactions let a live audience trade without the demo collapsing under friction.
 
 ## Product Surface
 
 - `/` join flow: create a burner wallet, request sponsor-funded testnet MON, route into the live market
-- `/m` phone trading UI: one-tap YES/NO, live price, position, P&L, cash out, redeem
-- `/screen` projector dashboard: price chart, trade feed, trades/sec, QR code, MonadScan links
-- `/admin` host console: create, resolve, cancel, and redeem markets with an injected wallet
+- `/m` phone trading UI: in-app social feed with scroll and swipe modes, creator stories, follows, likes, saves, comments, one-tap YES/NO, live price, position, P&L, cash out, redeem
+- `/screen` projector dashboard: active reel, price chart, trade feed, trades/sec, QR code, MonadScan links
+- `/admin` host console: choose a built-in reel, create time-boxed creator metric markets, resolve, cancel, and redeem markets with an injected wallet
 
 ## Stack
 
@@ -52,6 +52,7 @@ Required for a real submission:
 - `PRIVATE_KEY` for contract deployment
 - `SPONSOR_PRIVATE_KEY` for the burner wallet drip
 - `MONAD_RPC_URL` pointing at Monad testnet
+- `VITE_MONAD_RPC_URLS` and `MONAD_RPC_URLS` if you want frontend/server failover across public RPCs
 - `VITE_CLUTCH_ADDRESS` after deployment
 
 ## Submission Status

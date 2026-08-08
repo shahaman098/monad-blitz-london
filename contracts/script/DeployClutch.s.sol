@@ -22,7 +22,7 @@ contract DeployClutchScript is Script {
 
         if (vm.envOr("SEED_MARKET", false)) {
             uint256 amount = vm.envOr("SEED_AMOUNT", uint256(0.5 ether));
-            string memory q = vm.envOr("SEED_QUESTION", string("Will this demo win the room?"));
+            string memory q = vm.envOr("SEED_QUESTION", string("Will this Reel hit 10,000 views in 30 minutes?"));
             clutch.createMarket{value: amount}(q, 0);
         }
         vm.stopBroadcast();
