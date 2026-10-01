@@ -14,14 +14,21 @@ export default defineConfig(({ mode }) => {
       react(),
       tailwindcss(),
       {
-        // Runs the production API handler in `vite dev` so the join flow also
-        // works locally and over the venue LAN.
+        // Runs the production API handlers in `vite dev` so funding and the
+        // shared RPC relay also work locally and over the venue LAN.
         name: 'clutch-dev-api',
         configureServer(server) {
           server.middlewares.use(async (req, res, next) => {
-            if (!req.url?.startsWith('/api/fund')) return next()
+            const apiModule = req.url?.startsWith('/api/fund')
+              ? '/api/fund.ts'
+              : req.url?.startsWith('/api/history')
+                ? '/api/history.ts'
+              : req.url?.startsWith('/api/rpc')
+                ? '/api/rpc.ts'
+                : null
+            if (!apiModule) return next()
             try {
-              const mod = await server.ssrLoadModule('/api/fund.ts')
+              const mod = await server.ssrLoadModule(apiModule)
               await mod.default(req, res)
             } catch (error) {
               res.statusCode = 500

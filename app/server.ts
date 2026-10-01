@@ -6,6 +6,8 @@ import { createServer, type ServerResponse } from 'node:http'
 import { dirname, extname, join, normalize } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import fundHandler from './api/fund.ts'
+import historyHandler from './api/history.ts'
+import rpcHandler from './api/rpc.ts'
 
 const PORT = Number(process.env.PORT ?? 8080)
 const DIST_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'dist')
@@ -73,6 +75,8 @@ const server = createServer(async (req, res) => {
   }
 
   if (url.pathname === '/api/fund') return fundHandler(req, res)
+  if (url.pathname === '/api/history') return historyHandler(req, res)
+  if (url.pathname === '/api/rpc') return rpcHandler(req, res)
 
   if (req.method !== 'GET' && req.method !== 'HEAD') {
     res.statusCode = 405

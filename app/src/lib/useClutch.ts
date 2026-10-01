@@ -31,7 +31,8 @@ export type TradeEvent = {
   priceBps: number
   hash: `0x${string}`
   blockNumber: bigint
-  seenAt: number
+  /** Unix milliseconds from the Monad block containing the trade. */
+  timestampMs: number | null
 }
 
 export const priceYesBps = (m: Pick<Market, 'resYes' | 'resNo'>): number => {
@@ -44,15 +45,18 @@ export const isOpen = (m: Market) =>
   m.status === 0 && (m.closesAt === 0n || BigInt(Math.floor(Date.now() / 1000)) < m.closesAt)
 
 export const marketTimingLabel = (m: Pick<Market, 'closesAt' | 'status'>): string => {
-  if (m.status !== 0) return 'resolved'
+  if (m.status === 1) return 'resolved'
+  if (m.status === 2) return 'cancelled · refunds available'
   if (m.closesAt === 0n) return 'open until host resolves'
   const secondsLeft = Number(m.closesAt - BigInt(Math.floor(Date.now() / 1000)))
   if (secondsLeft <= 0) return 'closed for trading'
-  if (secondsLeft < 60) return `${secondsLeft}s left`
-  const minutes = Math.ceil(secondsLeft / 60)
-  if (minutes < 60) return `${minutes}m left`
-  const hours = Math.ceil(minutes / 60)
-  return `${hours}h left`
+  const seconds = secondsLeft % 60
+  const minutes = Math.floor(secondsLeft / 60) % 60
+  const hours = Math.floor(secondsLeft / 3600)
+  if (hours > 0) {
+    return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} left`
+  }
+  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} left`
 }
 
 const base = { address: CLUTCH_ADDRESS, abi: clutchAbi } as const
@@ -124,76 +128,201 @@ export function useMarkets(intervalMs = 2500) {
  * Trade feed via explicit getLogs polling. Deliberately not eth_newFilter —
  * filter support varies by RPC and a dead feed would kill the demo.
  */
-export function useTradeFeed(limit = 40, lookbackBlocks = 300n, intervalMs = 700) {
+const blockTimestampCache = new Map<bigint, number>()
+const blockTimestampPending = new Map<bigint, Promise<number>>()
+
+async function getBlockTimestamp(blockNumber: bigint): Promise<number> {
+  const cached = blockTimestampCache.get(blockNumber)
+  if (cached !== undefined) return cached
+
+  const pending = blockTimestampPending.get(blockNumber)
+  if (pending) return pending
+
+  const request = publicClient
+    .getBlock({ blockNumber, includeTransactions: false })
+    .then((block) => {
+      const timestampMs = Number(block.timestamp) * 1000
+      blockTimestampCache.set(blockNumber, timestampMs)
+      return timestampMs
+    })
+    .finally(() => blockTimestampPending.delete(blockNumber))
+
+  blockTimestampPending.set(blockNumber, request)
+  return request
+}
+
+async function attachBlockTimes(events: TradeEvent[], concurrency = 4): Promise<TradeEvent[]> {
+  const blocks = [
+    ...new Set(
+      events.filter((event) => event.timestampMs === null).map((event) => event.blockNumber)
+    ),
+  ]
+  const timestamps = new Map<bigint, number>()
+
+  // Keep the relay below public RPC burst limits while hydrating old history.
+  for (let i = 0; i < blocks.length; i += concurrency) {
+    await Promise.all(
+      blocks.slice(i, i + concurrency).map(async (blockNumber) => {
+        try {
+          timestamps.set(blockNumber, await getBlockTimestamp(blockNumber))
+        } catch {
+          // The trade remains useful even if one block-time lookup is throttled.
+        }
+      })
+    )
+  }
+
+  return events.map((event) => ({
+    ...event,
+    timestampMs: event.timestampMs ?? timestamps.get(event.blockNumber) ?? null,
+  }))
+}
+
+function decodeTradeLogs(logs: Log[]): TradeEvent[] {
+  const decoded: TradeEvent[] = []
+  for (const log of logs) {
+    try {
+      const ev = decodeEventLog({
+        abi: clutchAbi,
+        data: log.data,
+        topics: log.topics,
+      })
+      if (ev.eventName !== 'Trade') continue
+      const a = ev.args as unknown as {
+        marketId: bigint
+        trader: `0x${string}`
+        isYes: boolean
+        isBuy: boolean
+        collateralDelta: bigint
+        shares: bigint
+        resYes: bigint
+        resNo: bigint
+      }
+      decoded.push({
+        key: `${log.transactionHash}-${log.logIndex}`,
+        marketId: Number(a.marketId),
+        trader: a.trader,
+        isYes: a.isYes,
+        isBuy: a.isBuy,
+        collateral: a.collateralDelta,
+        shares: a.shares,
+        resYes: a.resYes,
+        resNo: a.resNo,
+        priceBps: priceYesBps({ resYes: a.resYes, resNo: a.resNo }),
+        hash: log.transactionHash!,
+        blockNumber: log.blockNumber!,
+        timestampMs: null,
+      })
+    } catch {
+      // Non-Trade event from this contract; ignore.
+    }
+  }
+  return decoded
+}
+
+type IndexedTrade = Omit<TradeEvent, 'collateral' | 'shares' | 'resYes' | 'resNo' | 'blockNumber' | 'priceBps' | 'timestampMs'> & {
+  collateral: string
+  shares: string
+  resYes: string
+  resNo: string
+  blockNumber: string
+  timestampMs: number
+}
+
+async function fetchIndexedTrades(): Promise<TradeEvent[]> {
+  const response = await fetch(`/api/history?address=${CLUTCH_ADDRESS}`)
+  if (!response.ok) throw new Error(`History endpoint returned ${response.status}`)
+  const payload = (await response.json()) as { trades?: IndexedTrade[] }
+  return (payload.trades ?? []).map((trade) => {
+    const resYes = BigInt(trade.resYes)
+    const resNo = BigInt(trade.resNo)
+    return {
+      ...trade,
+      collateral: BigInt(trade.collateral),
+      shares: BigInt(trade.shares),
+      resYes,
+      resNo,
+      blockNumber: BigInt(trade.blockNumber),
+      priceBps: priceYesBps({ resYes, resNo }),
+    }
+  })
+}
+
+export function useTradeFeed(
+  limit = 80,
+  lookbackBlocks = 100n,
+  intervalMs = 1500,
+  marketId: number | null = null
+) {
   const [trades, setTrades] = useState<TradeEvent[]>([])
   const cursor = useRef<bigint | null>(null)
 
   useEffect(() => {
     if (!hasContract) return
     let alive = true
+    let running = false
+    cursor.current = null
+    setTrades([])
 
     const tick = async () => {
+      if (running) return
+      running = true
       try {
         const head = await publicClient.getBlockNumber()
-        const from =
-          cursor.current ?? (head > lookbackBlocks ? head - lookbackBlocks : 0n)
-        if (from > head) return
-
-        const logs = await publicClient.getLogs({
-          address: CLUTCH_ADDRESS,
-          fromBlock: from,
-          toBlock: head,
-        })
-        cursor.current = head + 1n
-        if (!alive || logs.length === 0) return
-
         const decoded: TradeEvent[] = []
-        for (const log of logs as Log[]) {
+
+        if (cursor.current === null) {
           try {
-            const ev = decodeEventLog({
-              abi: clutchAbi,
-              data: log.data,
-              topics: log.topics,
-            })
-            if (ev.eventName !== 'Trade') continue
-            const a = ev.args as unknown as {
-              marketId: bigint
-              trader: `0x${string}`
-              isYes: boolean
-              isBuy: boolean
-              collateralDelta: bigint
-              shares: bigint
-              resYes: bigint
-              resNo: bigint
-            }
-            decoded.push({
-              key: `${log.transactionHash}-${log.logIndex}`,
-              marketId: Number(a.marketId),
-              trader: a.trader,
-              isYes: a.isYes,
-              isBuy: a.isBuy,
-              collateral: a.collateralDelta,
-              shares: a.shares,
-              resYes: a.resYes,
-              resNo: a.resNo,
-              priceBps: priceYesBps({ resYes: a.resYes, resNo: a.resNo }),
-              hash: log.transactionHash!,
-              blockNumber: log.blockNumber!,
-              seenAt: Date.now(),
-            })
+            decoded.push(...(await fetchIndexedTrades()))
           } catch {
-            // Non-Trade event from this contract; ignore.
+            // The short RPC window below still keeps new trades live.
           }
+
+          // Monad's public RPC rejects large eth_getLogs ranges. The indexed
+          // endpoint supplies history; this short window closes its freshness gap.
+          const fromBlock = head >= lookbackBlocks ? head - lookbackBlocks + 1n : 0n
+          try {
+            const logs = await publicClient.getLogs({
+              address: CLUTCH_ADDRESS,
+              fromBlock,
+              toBlock: head,
+            })
+            decoded.push(...decodeTradeLogs(logs as Log[]))
+          } catch {
+            // Indexed history remains usable if the live RPC is throttled.
+          }
+          cursor.current = head + 1n
+        } else {
+          const fromBlock = cursor.current
+          if (fromBlock > head) return
+          const logs = await publicClient.getLogs({
+            address: CLUTCH_ADDRESS,
+            fromBlock,
+            toBlock: head,
+          })
+          decoded.push(...decodeTradeLogs(logs as Log[]))
+          cursor.current = head + 1n
         }
-        if (decoded.length === 0) return
+
+        if (!alive || decoded.length === 0) return
+
+        const newest = [...new Map(decoded.map((trade) => [trade.key, trade])).values()]
+          .sort((a, b) =>
+            a.blockNumber < b.blockNumber ? -1 : a.blockNumber > b.blockNumber ? 1 : 0
+          )
+          .slice(-limit)
+        const timestamped = await attachBlockTimes(newest)
+        if (!alive) return
 
         setTrades((prev) => {
-          const seen = new Set(prev.map((t) => t.key))
-          const fresh = decoded.filter((t) => !seen.has(t.key))
+          const seen = new Set(prev.map((trade) => trade.key))
+          const fresh = timestamped.filter((trade) => !seen.has(trade.key))
           return [...fresh.reverse(), ...prev].slice(0, limit)
         })
       } catch {
         // Transient RPC hiccup; next tick retries from the same cursor.
+      } finally {
+        running = false
       }
     }
 
@@ -203,97 +332,80 @@ export function useTradeFeed(limit = 40, lookbackBlocks = 300n, intervalMs = 700
       alive = false
       clearInterval(handle)
     }
-  }, [intervalMs, limit, lookbackBlocks])
+  }, [intervalMs, limit, lookbackBlocks, marketId])
 
   /** Trades per second over a rolling 5s window — the throughput flex. */
   const tps = useMemo(() => {
     const cutoff = Date.now() - 5000
-    return trades.filter((t) => t.seenAt >= cutoff).length / 5
+    return trades.filter((t) => t.timestampMs !== null && t.timestampMs >= cutoff).length / 5
   }, [trades])
 
   return { trades, tps }
 }
 
-export type PricePoint = { blockNumber: bigint; priceBps: number }
-export type PriceSeries = { points: PricePoint[]; seededUpTo: number }
+export type PricePoint = {
+  blockNumber: bigint | null
+  timestampMs: number | null
+  priceBps: number
+  source: 'trade' | 'snapshot'
+  collateral?: bigint
+  isYes?: boolean
+  isBuy?: boolean
+  hash?: `0x${string}`
+}
 
 /**
  * Real price history for one market, rebuilt from `Trade` logs rather than
  * sampled client-side — so the chart is populated the moment the page loads
  * instead of starting flat and filling in over a minute.
  *
- * `trades` comes from `useTradeFeed`, so this adds no extra RPC load (the
- * public Monad endpoint rate-limits at 15 req/sec).
+ * `trades` comes from `useTradeFeed`; timestamps are read once per unique block
+ * and cached, keeping reloads truthful without creating a second event poller.
  */
-/**
- * Deterministic warm-up curve so a fresh market shows a real-looking trend
- * instead of a flat line. Seeded from the market id, so it is stable across
- * reloads and identical on the phone and the projector.
- *
- * This is demo scaffolding, not chain data — the UI labels it, and every point
- * after `seedCount` is a real on-chain trade.
- */
-function seedTrend(marketId: number, count: number, endBps: number): number[] {
-  let s = (marketId + 1) * 9301
-  const rand = () => {
-    s = (s * 9301 + 49297) % 233280
-    return s / 233280
-  }
-
-  // Waypoints, not a random walk: a walk this short averages out to a flat line.
-  // A rally, a sell-off, then a drift onto the live price gives a readable shape.
-  const rally = 5000 + 1400 + Math.round(rand() * 1600) // ~64–80%
-  const dump = 2600 + Math.round(rand() * 1500) // ~26–41%
-  const waypoints = [5000, rally, dump, endBps]
-
-  const out: number[] = []
-  const legs = waypoints.length - 1
-  for (let i = 0; i < count; i++) {
-    const t = (i / (count - 1)) * legs
-    const leg = Math.min(legs - 1, Math.floor(t))
-    const k = t - leg
-    // Smoothstep keeps the turns curved rather than sawtoothed.
-    const ease = k * k * (3 - 2 * k)
-    const base = waypoints[leg] + (waypoints[leg + 1] - waypoints[leg]) * ease
-    const noise = (rand() - 0.5) * 420
-    // Damp the noise near the end so the join onto the live price stays clean.
-    const damp = i > count - 5 ? 0.15 : 1
-    out.push(Math.round(Math.max(800, Math.min(9200, base + noise * damp))))
-  }
-  out[out.length - 1] = endBps
-  return out
-}
 
 export function usePriceSeries(
   trades: TradeEvent[],
   marketId: number | null,
-  live?: Pick<Market, 'resYes' | 'resNo'> | null,
-  seedCount = 34
-): PriceSeries {
+  live?: Pick<Market, 'resYes' | 'resNo'> | null
+): PricePoint[] {
   const liveBps = live ? priceYesBps(live) : 5000
   return useMemo(() => {
-    if (marketId === null) return { points: [], seededUpTo: 0 }
+    if (marketId === null) return []
 
     const real = trades
       .filter((t) => t.marketId === marketId)
-      .map((t) => ({ blockNumber: t.blockNumber, priceBps: t.priceBps }))
+      .map((t): PricePoint => ({
+        blockNumber: t.blockNumber,
+        timestampMs: t.timestampMs,
+        priceBps: t.priceBps,
+        source: 'trade',
+        collateral: t.collateral,
+        isYes: t.isYes,
+        isBuy: t.isBuy,
+        hash: t.hash,
+      }))
       // useTradeFeed stores newest-first; a chart needs oldest-first.
-      .sort((a, b) => (a.blockNumber < b.blockNumber ? -1 : a.blockNumber > b.blockNumber ? 1 : 0))
+      .sort((a, b) => (a.blockNumber! < b.blockNumber! ? -1 : a.blockNumber! > b.blockNumber! ? 1 : 0))
 
-    // Warm-up ends where real history begins, so the two never contradict.
-    const joinAt = real.length > 0 ? real[0].priceBps : liveBps
-    const seeded = seedTrend(marketId, seedCount, joinAt).map((priceBps, i) => ({
-      blockNumber: BigInt(i),
-      priceBps,
-    }))
-
-    const points = [...seeded, ...real]
-    const last = points[points.length - 1]
+    const points = [...real]
+    const last = real[real.length - 1]
     if (last && last.priceBps !== liveBps) {
-      points.push({ blockNumber: last.blockNumber + 1n, priceBps: liveBps })
+      points.push({
+        blockNumber: null,
+        timestampMs: Date.now(),
+        priceBps: liveBps,
+        source: 'snapshot',
+      })
+    } else if (!last) {
+      points.push({
+        blockNumber: null,
+        timestampMs: Date.now(),
+        priceBps: liveBps,
+        source: 'snapshot',
+      })
     }
-    return { points, seededUpTo: seeded.length }
-  }, [trades, marketId, liveBps, seedCount])
+    return points
+  }, [trades, marketId, liveBps])
 }
 
 export function useBlockNumber(intervalMs = 500) {
@@ -337,7 +449,9 @@ export function usePosition(marketId: number | null, trader?: `0x${string}`) {
 
   useEffect(() => {
     void refresh()
-    const handle = setInterval(refresh, 900)
+    // Positions are user-specific and cannot be coalesced across the room.
+    // A calmer cadence leaves RPC headroom for the transaction itself.
+    const handle = setInterval(refresh, 3000)
     return () => clearInterval(handle)
   }, [refresh])
 

@@ -1,22 +1,35 @@
 import { useId, useMemo, useState } from 'react'
+import { fmtMon } from '../lib/chain'
 import type { PricePoint } from '../lib/useClutch'
 
-/**
- * Compact probability chart: YES odds over time on a fixed 0–100% axis, so a
- * two-point drift cannot be auto-scaled into a fake cliff.
- *
- * The warm-up segment (everything before `seededUpTo`) is drawn dashed and
- * labelled, because it is demo scaffolding rather than chain history. Real
- * on-chain trades are the solid part of the line.
- */
+const fullDate = new Intl.DateTimeFormat(undefined, {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+})
+
+const axisDate = new Intl.DateTimeFormat(undefined, {
+  month: 'short',
+  day: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+})
+
+function formatTime(timestampMs: number | null, compact = false) {
+  if (timestampMs === null) return 'Time pending'
+  return (compact ? axisDate : fullDate).format(new Date(timestampMs))
+}
+
+/** A fixed 0-100% odds tracker built only from Monad trade events and live state. */
 export function PriceChart({
   points,
-  seededUpTo = 0,
-  height = 76,
+  height = 104,
   accent = 'var(--bp-yes-fill, var(--bp-yes))',
 }: {
   points: PricePoint[]
-  seededUpTo?: number
   height?: number
   accent?: string
 }) {
@@ -25,103 +38,180 @@ export function PriceChart({
 
   const xy = useMemo(() => {
     if (points.length === 0) return []
-    const src = points.length === 1 ? [points[0], points[0]] : points
-    return src.map((p, i) => ({
-      x: (i / (src.length - 1)) * 100,
-      y: 100 - (p.priceBps / 10_000) * 100,
-      bps: p.priceBps,
+    const knownTimes = points.map((point) => point.timestampMs)
+    const canUseTime = knownTimes.every((time): time is number => time !== null)
+    const minTime = canUseTime ? Math.min(...knownTimes) : 0
+    const maxTime = canUseTime ? Math.max(...knownTimes) : 0
+    const hasTimeRange = canUseTime && maxTime > minTime
+
+    return points.map((point, index) => ({
+      x:
+        points.length === 1
+          ? 100
+          : hasTimeRange
+            ? ((point.timestampMs! - minTime) / (maxTime - minTime)) * 100
+            : (index / (points.length - 1)) * 100,
+      y: 100 - point.priceBps / 100,
+      point,
     }))
   }, [points])
 
   if (xy.length === 0) {
-    return <div className="chart-empty" style={{ height }} />
+    return (
+      <div className="chart-empty" style={{ height }}>
+        Waiting for Monad market data
+      </div>
+    )
   }
 
-  // Overlap by one point so the dashed and solid halves visually connect.
-  const cut = Math.max(1, Math.min(xy.length - 1, seededUpTo))
-  const warm = xy.slice(0, cut + 1)
-  const realPart = xy.slice(cut)
+  const drawPoints =
+    xy.length === 1
+      ? [
+          { ...xy[0], x: 0 },
+          { ...xy[0], x: 100 },
+        ]
+      : xy
+  const path = drawPoints.map((point) => `${point.x.toFixed(2)},${point.y.toFixed(2)}`).join(' ')
+  const area = `0,100 ${path} 100,100`
+  const selectedIndex = hover ?? xy.length - 1
+  const selected = xy[selectedIndex]
+  const delta = selected.point.priceBps - xy[0].point.priceBps
+  const tradeCount = points.filter((point) => point.source === 'trade').length
+  const midPoint = points[Math.floor((points.length - 1) / 2)]
 
-  const path = (pts: typeof xy) => pts.map((p) => `${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(' ')
-  const area = `${xy[0].x},100 ${path(xy)} 100,100`
-
-  const last = xy[xy.length - 1].bps
-  const delta = last - xy[0].bps
-  const shown = hover !== null ? xy[hover] : xy[xy.length - 1]
-  const up = delta >= 0
+  const selectFromPointer = (clientX: number, element: SVGSVGElement) => {
+    const bounds = element.getBoundingClientRect()
+    const cursorX = ((clientX - bounds.left) / bounds.width) * 100
+    let nearest = 0
+    let distance = Number.POSITIVE_INFINITY
+    xy.forEach((point, index) => {
+      const nextDistance = Math.abs(point.x - cursorX)
+      if (nextDistance < distance) {
+        nearest = index
+        distance = nextDistance
+      }
+    })
+    setHover(nearest)
+  }
 
   return (
-    <div className="chart">
-      <div className="chart-head">
-        <strong className="nums">{(shown.bps / 100).toFixed(1)}%</strong>
-        <span className={`nums chart-delta ${up ? 'is-up' : 'is-down'}`}>
-          {up ? '▲' : '▼'} {Math.abs(delta / 100).toFixed(1)}
+    <section className="chart" aria-label="YES odds over time">
+      <div className="chart-kicker">
+        <span>
+          <i /> Live odds tracker
         </span>
-        {seededUpTo > 0 && realPart.length <= 2 && (
-          <span className="chart-tag">warm-up · live from first bet</span>
-        )}
+        <span>{tradeCount} on-chain {tradeCount === 1 ? 'trade' : 'trades'}</span>
+      </div>
+
+      <div className="chart-head">
+        <div>
+          <strong className="nums">{(selected.point.priceBps / 100).toFixed(1)}%</strong>
+          <span>YES probability</span>
+        </div>
+        <span className={`nums chart-delta ${delta >= 0 ? 'is-up' : 'is-down'}`}>
+          {delta >= 0 ? '+' : ''}
+          {(delta / 100).toFixed(1)} pts
+        </span>
       </div>
 
       <div className="chart-plot" style={{ height }}>
         <svg
           viewBox="0 0 100 100"
           preserveAspectRatio="none"
-          onMouseLeave={() => setHover(null)}
-          onMouseMove={(e) => {
-            const r = e.currentTarget.getBoundingClientRect()
-            const ratio = (e.clientX - r.left) / r.width
-            setHover(Math.max(0, Math.min(xy.length - 1, Math.round(ratio * (xy.length - 1)))))
-          }}
+          onPointerLeave={() => setHover(null)}
+          onPointerMove={(event) => selectFromPointer(event.clientX, event.currentTarget)}
         >
           <defs>
             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={accent} stopOpacity="0.26" />
+              <stop offset="0%" stopColor={accent} stopOpacity="0.28" />
               <stop offset="100%" stopColor={accent} stopOpacity="0" />
             </linearGradient>
           </defs>
 
-          <line x1="0" x2="100" y1="50" y2="50" className="chart-mid" vectorEffect="non-scaling-stroke" />
-          <polygon points={area} fill={`url(#${gradientId})`} />
-
-          {warm.length > 1 && (
-            <polyline
-              points={path(warm)}
-              fill="none"
-              stroke={accent}
-              strokeWidth="1.5"
-              strokeOpacity="0.45"
-              strokeDasharray="3 3"
-              vectorEffect="non-scaling-stroke"
-            />
-          )}
-          {realPart.length > 1 && (
-            <polyline
-              points={path(realPart)}
-              fill="none"
-              stroke={accent}
-              strokeWidth="2"
-              strokeLinejoin="round"
-              strokeLinecap="round"
-              vectorEffect="non-scaling-stroke"
-            />
-          )}
-
-          {hover !== null && (
+          {[25, 50, 75].map((level) => (
             <line
-              x1={xy[hover].x}
-              x2={xy[hover].x}
-              y1="0"
-              y2="100"
-              className="chart-cursor"
+              key={level}
+              x1="0"
+              x2="100"
+              y1={100 - level}
+              y2={100 - level}
+              className="chart-grid"
               vectorEffect="non-scaling-stroke"
             />
+          ))}
+          <polygon points={area} fill={`url(#${gradientId})`} />
+          <polyline
+            points={path}
+            fill="none"
+            stroke={accent}
+            strokeWidth="2.2"
+            strokeLinejoin="round"
+            strokeLinecap="round"
+            vectorEffect="non-scaling-stroke"
+          />
+
+          {xy.map(({ x, y, point }, index) =>
+            point.source === 'trade' ? (
+              <circle
+                key={`${point.hash ?? point.blockNumber}-${index}`}
+                cx={x}
+                cy={y}
+                r="1.45"
+                className="chart-point"
+                fill={accent}
+                vectorEffect="non-scaling-stroke"
+              />
+            ) : null
           )}
-          <circle cx={shown.x} cy={shown.y} r="2.5" fill={accent} vectorEffect="non-scaling-stroke" />
+
+          <line
+            x1={selected.x}
+            x2={selected.x}
+            y1="0"
+            y2="100"
+            className="chart-cursor"
+            vectorEffect="non-scaling-stroke"
+          />
+          <circle
+            cx={selected.x}
+            cy={selected.y}
+            r="2.6"
+            fill={accent}
+            className="chart-selected"
+            vectorEffect="non-scaling-stroke"
+          />
         </svg>
-        <span className="chart-y chart-y-top">100</span>
-        <span className="chart-y chart-y-mid">50</span>
-        <span className="chart-y chart-y-bot">0</span>
+        <span className="chart-y chart-y-top">100%</span>
+        <span className="chart-y chart-y-mid">50%</span>
+        <span className="chart-y chart-y-bot">0%</span>
       </div>
-    </div>
+
+      <div className="chart-axis nums">
+        <span>{formatTime(points[0].timestampMs, true)}</span>
+        {points.length > 2 && <span>{formatTime(midPoint.timestampMs, true)}</span>}
+        <span>{formatTime(points[points.length - 1].timestampMs, true)}</span>
+      </div>
+
+      <div className="chart-detail" aria-live="polite">
+        <div>
+          <span>{selected.point.source === 'trade' ? 'Monad trade' : 'Live market snapshot'}</span>
+          <strong className="nums">{formatTime(selected.point.timestampMs)}</strong>
+        </div>
+        <div>
+          <span>
+            {selected.point.source === 'trade'
+              ? `${selected.point.isBuy ? 'Bought' : 'Sold'} ${selected.point.isYes ? 'YES' : 'NO'}`
+              : 'Latest contract state'}
+          </span>
+          <strong className="nums">
+            {selected.point.collateral !== undefined
+              ? `${fmtMon(selected.point.collateral, 4)} MON`
+              : selected.point.blockNumber !== null
+                ? `Block ${selected.point.blockNumber}`
+                : 'Updating live'}
+          </strong>
+        </div>
+      </div>
+    </section>
   )
 }

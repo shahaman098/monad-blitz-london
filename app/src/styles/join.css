@@ -29,6 +29,14 @@
   letter-spacing: -0.04em;
 }
 
+.join-copy {
+  margin: -8px 0 -12px;
+  color: rgba(242, 245, 250, 0.72);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
 @keyframes join-in {
   from {
     opacity: 0;

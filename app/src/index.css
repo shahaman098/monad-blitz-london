@@ -215,6 +215,11 @@ input {
   box-shadow: 0 0 18px rgba(248, 197, 107, 0.7);
 }
 
+.status-pill.is-warning {
+  border-color: rgba(255, 98, 125, 0.45);
+  color: var(--no);
+}
+
 .section-card {
   position: relative;
   border: 1px solid var(--line);
@@ -1885,6 +1890,13 @@ input {
   display: flex;
   gap: 0.8rem;
   margin-top: 0.8rem;
+}
+
+.admin-preset-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 0.8rem;
 }
 
 .admin-button {

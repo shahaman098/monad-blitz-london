@@ -1,0 +1,44 @@
+{"kind":"deck","id":"pr/0z6p1i","name":"Deck"}
+{"kind":"layout","layoutId":"3b919471-7dff-4b7a-b770-ce31230a97fb","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"e7fb009a-54b0-410e-8ed5-73a7b685faaf","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/74vtkz","slide":1,"title":"Monad Blitz London","textShapes":5}
+{"kind":"textbox","id":"sh/6xg3a90r","slide":1,"name":"s1-eyebrow","text":"Monad Blitz London","textPreview":"Monad Blitz London","textChars":18,"textLines":1,"bbox":[41,41,760,52]}
+{"kind":"textbox","id":"sh/t0rml4zi","slide":1,"name":"s1-title","text":"Clutch turns virality into a live market","textPreview":"Clutch turns virality into a live market","textChars":40,"textLines":1,"bbox":[41,252,1010,270]}
+{"kind":"textbox","id":"sh/szilczix","slide":1,"name":"s1-subtitle","text":"A room scans, gets funded in seconds, trades YES/NO on creator momentum, and watches the odds move live on Monad.","textPreview":"A room scans, gets funded in seconds, trades YES/NO on creator momentum, and watches the odds move live on Monad.","textChars":113,"textLines":1,"bbox":[41,560,700,66]}
+{"kind":"textbox","id":"sh/jup4fuhg","slide":1,"name":"s1-link","text":"Open live demo","textPreview":"Open live demo","textChars":14,"textLines":1,"bbox":[906,42,332,80]}
+{"kind":"textbox","id":"sh/i9g36p0v","slide":1,"name":"footer-1","text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[1182,660,44,20]}
+{"kind":"notes","id":"nt/74vtkz","slide":1,"text":"[Sources]\n- Product framing and audience script: /Users/efi/Hackathons/Monad/docs/pitch.md\n- Live deployment URL and demo status: /Users/efi/Hackathons/Monad/docs/tasks.md\n- Public deployment summary: /Users/efi/Hackathons/Monad/README.md"}
+{"kind":"slide","id":"sl/stb24e","slide":2,"title":"The room joins and trades in seconds","textShapes":4}
+{"kind":"textbox","id":"sh/yp0vu9sz","slide":2,"name":"s2-title","text":"The room joins and trades in seconds","textPreview":"The room joins and trades in seconds","textChars":36,"textLines":1,"bbox":[41,36,590,60]}
+{"kind":"textbox","id":"sh/lsru54ra","slide":2,"name":"s2-body","text":"Clutch removes the normal crypto friction. The audience scans one QR, gets a funded burner wallet, and votes YES or NO while the same creator clip is still playing on the projector.","textPreview":"Clutch removes the normal crypto friction. The audience scans one QR, gets a funded burner wallet, and votes YES or NO while the same cre...","textChars":181,"textLines":1,"bbox":[41,205,520,250]}
+{"kind":"shape","id":"sh/kridwjap","slide":2,"name":"s2-rule","bbox":[41,142,1197,1.5]}
+{"kind":"shape","id":"sh/b2pczu98","slide":2,"name":"s2-callout","bbox":[41,508,540,104]}
+{"kind":"textbox","id":"sh/q1gbqpsn","slide":2,"name":"s2-callout-text","text":"No MetaMask. No faucet. No setup. Just scan and trade.","textPreview":"No MetaMask. No faucet. No setup. Just scan and trade.","textChars":54,"textLines":1,"bbox":[71,535,480,56]}
+{"kind":"textbox","id":"sh/c3ytszat","slide":2,"name":"footer-2","text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[1182,660,44,20]}
+{"kind":"image","id":"im/8zupc3up","slide":2,"name":"","geometry":"roundRect","alt":"Live Clutch screen route with projector QR and active Zach King market.","bbox":[658,42,582,588]}
+{"kind":"notes","id":"nt/stb24e","slide":2,"text":"[Sources]\n- Live screenshot captured 2026-08-08 from https://clutch-597773359205.europe-west2.run.app/screen\n- Screenshot asset: /Users/efi/Hackathons/Monad/.tmp/presentation-build/clutch-screen.png\n- QR join flow and projector behavior: /Users/efi/Hackathons/Monad/docs/architecture.md\n- Audience flow and setup checklist: /Users/efi/Hackathons/Monad/docs/pitch.md"}
+{"kind":"slide","id":"sl/58ques","slide":3,"title":"The market already reprices on Monad testnet","textShapes":9}
+{"kind":"textbox","id":"sh/3m9wz6tk","slide":3,"name":"s3-title","text":"The market already reprices on Monad testnet","textPreview":"The market already reprices on Monad testnet","textChars":44,"textLines":1,"bbox":[41,36,1197,70]}
+{"kind":"shape","id":"sh/5ore1gbq","slide":3,"name":"s3-card-1","bbox":[681,136,516,108]}
+{"kind":"textbox","id":"sh/uxgvm1c3","slide":3,"name":"s3-card-1-label","text":"Sponsor funding landed","textPreview":"Sponsor funding landed","textChars":22,"textLines":1,"bbox":[713,163,452,28]}
+{"kind":"textbox","id":"sh/vypwv6to","slide":3,"name":"s3-card-1-value","text":"0.200 MON to a fresh burner wallet","textPreview":"0.200 MON to a fresh burner wallet","textChars":34,"textLines":1,"bbox":[713,192,452,38]}
+{"kind":"shape","id":"sh/gjydobu9","slide":3,"name":"s3-card-2","bbox":[681,268,516,108]}
+{"kind":"textbox","id":"sh/hkrexgbu","slide":3,"name":"s3-card-2-label","text":"Real NO trade moved the odds","textPreview":"Real NO trade moved the odds","textChars":28,"textLines":1,"bbox":[713,295,452,28]}
+{"kind":"textbox","id":"sh/6tgvihc7","slide":3,"name":"s3-card-2-value","text":"YES 50.0% -> 47.6%","textPreview":"YES 50.0% -> 47.6%","textChars":18,"textLines":1,"bbox":[713,324,452,38]}
+{"kind":"shape","id":"sh/7upwrmts","slide":3,"name":"s3-card-3","bbox":[681,400,516,108]}
+{"kind":"textbox","id":"sh/3y9sv65g","slide":3,"name":"s3-card-3-label","text":"Real YES trade moved it back","textPreview":"Real YES trade moved it back","textChars":28,"textLines":1,"bbox":[713,427,452,28]}
+{"kind":"textbox","id":"sh/2x0b214v","slide":3,"name":"s3-card-3-value","text":"YES 47.6% -> 50.1%","textPreview":"YES 47.6% -> 50.1%","textChars":18,"textLines":1,"bbox":[713,456,452,38]}
+{"kind":"textbox","id":"sh/p0raxgn6","slide":3,"name":"s3-summary","text":"The audience is not watching a simulated chart. The same live market already has funded wallets, confirmed trades, and MonadScan proof.","textPreview":"The audience is not watching a simulated chart. The same live market already has funded wallets, confirmed trades, and MonadScan proof.","textChars":135,"textLines":1,"bbox":[681,558,516,70]}
+{"kind":"textbox","id":"sh/ozit4bm1","slide":3,"name":"footer-3","text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[1182,660,44,20]}
+{"kind":"image","id":"im/l4bmlwva","slide":3,"name":"","geometry":"roundRect","alt":"Clutch frontend route showing the active reel and live betting panel.","bbox":[41,136,598,505]}
+{"kind":"notes","id":"nt/58ques","slide":3,"text":"[Sources]\n- Live screenshot captured 2026-08-08 from https://clutch-597773359205.europe-west2.run.app/frontend\n- Screenshot asset: /Users/efi/Hackathons/Monad/.tmp/presentation-build/clutch-frontend.png\n- Funding amount, live market #1, and real trade repricing proofs: /Users/efi/Hackathons/Monad/docs/tasks.md\n- Contract page: https://testnet.monadscan.com/address/0x194bd79723fC1C6BC6Cf635349f0190EbCFf59AD"}
+{"kind":"slide","id":"sl/p3aonl","slide":4,"title":"Vote with your phone","textShapes":6}
+{"kind":"textbox","id":"sh/r2tsv2lc","slide":4,"name":"s4-eyebrow","text":"Vote with your phone","textPreview":"Vote with your phone","textChars":20,"textLines":1,"bbox":[41,41,190,42]}
+{"kind":"textbox","id":"sh/s32947mx","slide":4,"name":"s4-title","text":"Scan, trade, and vote for Clutch","textPreview":"Scan, trade, and vote for Clutch","textChars":32,"textLines":1,"bbox":[41,175,560,210]}
+{"kind":"textbox","id":"sh/t4baxc3i","slide":4,"name":"s4-body","text":"Open the live demo, get testnet MON instantly, and push the market while the reel is still on screen.","textPreview":"Open the live demo, get testnet MON instantly, and push the market while the reel is still on screen.","textChars":101,"textLines":1,"bbox":[41,448,520,120]}
+{"kind":"textbox","id":"sh/epkr6hk3","slide":4,"name":"s4-link","text":"clutch-597773359205.europe-west2.run.app/frontend","textPreview":"clutch-597773359205.europe-west2.run.app/frontend","textChars":49,"textLines":1,"bbox":[41,606,600,56]}
+{"kind":"shape","id":"sh/grm98r2t","slide":4,"name":"s4-qr-caption-panel","bbox":[689,576,522,72]}
+{"kind":"textbox","id":"sh/1sva1w3e","slide":4,"name":"s4-qr-caption","text":"QR points directly to the live join route","textPreview":"QR points directly to the live join route","textChars":41,"textLines":1,"bbox":[719,598,462,30]}
+{"kind":"textbox","id":"sh/2t4ra1kz","slide":4,"name":"footer-4","text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[1182,660,44,20]}
+{"kind":"image","id":"im/6d8vi5c3","slide":4,"name":"","alt":"QR code for the Clutch join flow.","bbox":[716,88,470,470]}
+{"kind":"notes","id":"nt/p3aonl","slide":4,"text":"[Sources]\n- QR generated 2026-08-08 from https://clutch-597773359205.europe-west2.run.app/join\n- QR asset: /Users/efi/Hackathons/Monad/.tmp/presentation-build/clutch-join-qr.png\n- Public app URL and join flow: /Users/efi/Hackathons/Monad/docs/tasks.md\n- Public deployment summary: /Users/efi/Hackathons/Monad/README.md"}

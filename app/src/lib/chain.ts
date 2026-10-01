@@ -1,6 +1,7 @@
 import { createPublicClient, defineChain, fallback, http } from 'viem'
 
-const DEFAULT_RPC_URLS = ['https://rpc.ankr.com/monad_testnet', 'https://testnet-rpc.monad.xyz']
+const DEFAULT_RPC_URLS = ['https://testnet-rpc.monad.xyz', 'https://rpc.ankr.com/monad_testnet']
+const SAME_ORIGIN_RPC_URL = '/api/rpc'
 
 function parseRpcUrls(raw?: string): string[] {
   return [...new Set((raw ?? '').split(',').map((url) => url.trim()).filter(Boolean))]
@@ -8,10 +9,13 @@ function parseRpcUrls(raw?: string): string[] {
 
 export const RPC_URLS = (() => {
   const configured = parseRpcUrls(import.meta.env.VITE_MONAD_RPC_URLS as string | undefined)
-  if (configured.length > 0) return configured
+  if (configured.length > 0) return [SAME_ORIGIN_RPC_URL, ...configured]
 
   const primary = (import.meta.env.VITE_MONAD_RPC_URL as string | undefined)?.trim()
-  return [...new Set([primary, ...DEFAULT_RPC_URLS].filter((url): url is string => Boolean(url)))]
+  return [
+    SAME_ORIGIN_RPC_URL,
+    ...new Set([primary, ...DEFAULT_RPC_URLS].filter((url): url is string => Boolean(url))),
+  ]
 })()
 
 export const RPC_URL = RPC_URLS[0]

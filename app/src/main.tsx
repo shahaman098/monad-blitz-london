@@ -1,22 +1,26 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import './index.css'
+import Admin from './pages/Admin'
+import CookieConsent from './pages/CookieConsent'
 import Join from './pages/Join'
 import Trade from './pages/Trade'
-import Screen from './pages/Screen'
-import Admin from './pages/Admin'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Join />} />
+        <Route path="/" element={<Trade />} />
+        <Route path="/frontend" element={<Trade />} />
+        <Route path="/frontend/:id" element={<Trade />} />
+        <Route path="/cookie-consent" element={<CookieConsent />} />
+        <Route path="/join" element={<Join />} />
         <Route path="/m" element={<Trade />} />
         <Route path="/m/:id" element={<Trade />} />
-        <Route path="/screen" element={<Screen />} />
+        <Route path="/screen" element={<Trade />} />
         <Route path="/admin" element={<Admin />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Trade />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>

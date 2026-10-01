@@ -5,13 +5,8 @@ import { ClutchMark } from '../components/icons'
 import { publicClient } from '../lib/chain'
 import { getBurner, requestFunding } from '../lib/wallet'
 
-/**
- * Splash shown while a burner wallet is created and funded.
- *
- * Deliberately just the logo: this is the very first thing the room sees after
- * scanning, it is on screen for a second or two, and a checklist of internal
- * provisioning steps is noise to them. Only a failure is worth interrupting for.
- */
+const MINIMUM_SPLASH_MS = 1800
+
 export default function Join() {
   const navigate = useNavigate()
   const [error, setError] = useState<string | null>(null)
@@ -19,7 +14,15 @@ export default function Join() {
   useEffect(() => {
     let alive = true
 
-    const run = async () => {
+    const provision = async () => {
+      const splashStartedAt = Date.now()
+
+      const finish = async () => {
+        const remaining = MINIMUM_SPLASH_MS - (Date.now() - splashStartedAt)
+        if (remaining > 0) await new Promise((resolve) => setTimeout(resolve, remaining))
+        if (alive) navigate('/m', { replace: true })
+      }
+
       try {
         const account = getBurner()
         const existing = await publicClient.getBalance({ address: account.address })
@@ -30,21 +33,25 @@ export default function Join() {
           if (!alive) return
           if (!result.ok) throw new Error(result.error ?? 'Funding failed')
 
-          // Wait for the drip to land. Monad blocks are ~400ms, so this is quick.
-          for (let i = 0; i < 40; i++) {
-            const next = await publicClient.getBalance({ address: account.address })
+          for (let attempt = 0; attempt < 40; attempt++) {
+            const balance = await publicClient.getBalance({ address: account.address })
             if (!alive) return
-            if (next > 0n) break
-            await new Promise((r) => setTimeout(r, 400))
+            if (balance > 0n) {
+              await finish()
+              return
+            }
+            await new Promise((resolve) => setTimeout(resolve, 400))
           }
+          throw new Error('Funding did not land in time. Tap below to retry.')
         }
-        if (alive) navigate('/m', { replace: true })
-      } catch (e) {
-        if (alive) setError((e as Error).message)
+
+        await finish()
+      } catch (cause) {
+        if (alive) setError((cause as Error).message)
       }
     }
 
-    void run()
+    void provision()
     return () => {
       alive = false
     }
@@ -65,7 +72,10 @@ export default function Join() {
           </button>
         </div>
       ) : (
-        <span className="join-bar" aria-label="Loading" />
+        <>
+          <p className="join-copy">Creating your testnet wallet and adding MON</p>
+          <span className="join-bar" aria-label="Funding burner wallet" />
+        </>
       )}
     </main>
   )
